@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 struct Vertex {
 	int index;
@@ -17,19 +18,21 @@ struct Vertex {
 class Mesh
 {
 public:
-	Mesh(int index);
+	Mesh(std::string & filename);
 	~Mesh();
 
-
 	void draw();
-
-	void loadObj(std::string &filename);
-	void initVAO();
-
 	void destroy();
 
 private:
+	static size_t count_meshes;
+
 	GLuint m_vbo;
 	GLuint m_vao;
+
+	int m_numberOfVertices;
+
+	void loadObj(std::string &filename);
+	void initVAO();
 };
 

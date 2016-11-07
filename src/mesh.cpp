@@ -2,14 +2,29 @@
 
 #define BUFFER_OFFSET(i) ((GLintptr)NULL + (i))
 
-Mesh::Mesh(int index)
+size_t Mesh::count_meshes = 0;
+
+Mesh::Mesh(std::string &filename)
 {
-	m_vbo = index;
-	m_vao = index;
+	count_meshes++;
+	m_vbo = count_meshes;
+	m_vao = count_meshes;
+
+	loadObj(filename);
+	initVAO();
 }
 
 Mesh::~Mesh()
 {
+}
+
+void Mesh::draw()
+{
+	glBindVertexArray(m_vao);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_numberOfVertices);
+
+	glBindVertexArray(0);
 }
 
 void Mesh::loadObj(std::string & filename)
@@ -49,13 +64,24 @@ void Mesh::loadObj(std::string & filename)
 			textures.push_back(y);
 		}
 		if (word.compare("f") == 0) {
-			int i, j, k;
+		
 			std::string vertex;
 			for (int v = 0; v < 3; v++) {
+				int i, j, k;
 				ss >> vertex;
-				std::stringstream ss2(vertex, '/');
-				ss2 >> i >> j >> k;
+				std::stringstream ss2(vertex);
+				std::string index;
+				std::getline(ss2, index, '/');
+				i = std::stoi(index);
+
+				std::getline(ss2, index, '/');
+				j = std::stoi(index);
+
+				std::getline(ss2, index, '/');
+				k = std::stoi(index);
 				Vertex point;
+
+				//std::cout << i << " " << j << " " << k << std::endl;
 
 				i--;
 				j--;
@@ -76,6 +102,8 @@ void Mesh::loadObj(std::string & filename)
 			}
 		}
 	}
+
+	m_numberOfVertices = vertices.size();
 
 	std::vector<float> final_positions(3 * vertices.size());
 	std::vector<float> final_normals(3 * vertices.size());
@@ -102,9 +130,9 @@ void Mesh::loadObj(std::string & filename)
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
 	glBufferData(GL_ARRAY_BUFFER, 8 * vertices.size() * sizeof(float), 0, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, BUFFER_OFFSET(0), 3 * vertices.size() * sizeof(float), &final_positions[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, BUFFER_OFFSET(3 * vertices.size() * sizeof(float)), 3 * vertices.size() * sizeof(float), &final_normals[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, BUFFER_OFFSET(6 * vertices.size() * sizeof(float)), 2 * vertices.size() * sizeof(float), &final_textures[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(0), 3 * vertices.size() * sizeof(float), &final_positions[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(3 * vertices.size() * sizeof(float)), 3 * vertices.size() * sizeof(float), &final_normals[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(6 * vertices.size() * sizeof(float)), 2 * vertices.size() * sizeof(float), &final_textures[0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -118,11 +146,19 @@ void Mesh::initVAO()
 
 	glBindVertexArray(m_vao);
 
-	// TODO: Add the buffer calls once the shaders have been written.
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(0));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(3 * m_numberOfVertices * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(6 * m_numberOfVertices * sizeof(float)));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
-
-
 }
 
 void Mesh::destroy()
