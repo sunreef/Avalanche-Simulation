@@ -108,20 +108,13 @@ void Program::loadShaders(std::string vertexShaderFilename, std::string fragment
 	{
 		GLint maxLength = 0;
 		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &maxLength);
-
-		//The maxLength includes the NULL character
 		std::vector<GLchar> infoLog(maxLength);
 		glGetProgramInfoLog(m_program, maxLength, &maxLength, &infoLog[0]);
 
 		for (auto c : infoLog) {
 			std::cout << c;
 		}
-
-		//The program is useless now. So delete it.
 		glDeleteProgram(m_program);
-
-		//Provide the infolog in whatever manner you deem best.
-		//Exit with failure.
 		return;
 	}
 
