@@ -17,6 +17,11 @@
 
 #define MY_PI 3.14159265359f
 
+int size_x = 1920;
+int size_y = 1080;
+
+float azerty_rules = true;
+
 CallbackStruct callbackStructure;
 
 void display() {}
@@ -51,11 +56,9 @@ void keyboardUpCallback(unsigned char key, int x, int y) {
 	callbackStructure.ascii_keys[key] = false;
 }
 
-int main(int argc, char** argv) {
-std::cout << "Init finished" << std::endl;
-	int size_x = 1920;
-	int size_y = 1080;
-	
+void initOpenGLContext(int argc, char** argv) {
+
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
 	glutInitWindowPosition(0, 0);
@@ -70,29 +73,32 @@ std::cout << "Init finished" << std::endl;
 	glutKeyboardUpFunc(keyboardUpCallback);
 
 	glewInit();
+}
 
+int main(int argc, char** argv) {
 
+	initOpenGLContext(argc, argv);
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
 
 	Mesh m(std::string("../data/meshes/mesh_0.obj"));
 
-	glm::vec3 position = glm::vec3(4, 0, 1.0);
+
 
 	float horizontalAngle = MY_PI;
 	float verticalAngle = 0.0f;
 	float initialFOV = 45.0f;
 
-	float speed = 6.0f;
+	float speed = 10.0f;
 	float mouseSpeed = 0.1f;
 
 	clock_t time = clock();
 	float deltaTime = 0;
 
 	int frameTime = CLOCKS_PER_SEC / 60;
-
-	glm::mat4 modelView = glm::lookAt(glm::vec3(20.0, 10.0, 3.0), glm::vec3(4, -9, 1), glm::vec3(0, 0, 1.0));
-	glm::mat4 proj = glm::perspective(glm::radians(70.0f), (float)size_x / (float)size_y, 0.01f, 1000.0f);
+	glm::vec3 position = glm::vec3(7, 10, 3.0);
+	glm::mat4 modelView;
+	glm::mat4 proj;
 
 	glEnable(GL_DEPTH_TEST);
 	while (true) {
@@ -117,9 +123,9 @@ std::cout << "Init finished" << std::endl;
 			0
 		);
 
-		glm::vec3 up = - glm::cross(left, direction);
+		glm::vec3 up = -glm::cross(left, direction);
 
-		if (callbackStructure.ascii_keys['z']) {
+		if (callbackStructure.ascii_keys[(azerty_rules) ? 'z' : 'w']) {
 			position += deltaTime * speed * direction;
 			std::cout << deltaTime * speed << std::endl;
 		}
@@ -129,7 +135,7 @@ std::cout << "Init finished" << std::endl;
 		if (callbackStructure.ascii_keys['d']) {
 			position -= deltaTime * speed * left;
 		}
-		if (callbackStructure.ascii_keys['q']) {
+		if (callbackStructure.ascii_keys[(azerty_rules) ? 'q' : 'a']) {
 			position += deltaTime * speed * left;
 		}
 		if (callbackStructure.ascii_keys['r']) {
@@ -138,7 +144,9 @@ std::cout << "Init finished" << std::endl;
 		if (callbackStructure.ascii_keys['f']) {
 			position -= deltaTime * speed * up;
 		}
-
+		if (callbackStructure.ascii_keys[27]) {
+			break;
+		}
 
 		modelView = glm::lookAt(position, position + direction, up);
 		proj = glm::perspective(initialFOV, (float)size_x / size_y, 0.01f, 1000.0f);
@@ -150,7 +158,6 @@ std::cout << "Init finished" << std::endl;
 		m.draw();
 
 		prog.stopUseProgram();
-
 		glutSwapBuffers();
 	}
 
