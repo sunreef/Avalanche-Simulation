@@ -11,6 +11,6 @@ out vec4 frag_normal;
 
 void main() {
 	gl_Position = proj * modelView * vec4(position, 1.0);
-	
-	frag_normal = modelView * vec4(normal,0.0);
+	vec3 norm_normal = normalize(normal);
+	frag_normal = modelView * vec4(norm_normal,0.0);
 }

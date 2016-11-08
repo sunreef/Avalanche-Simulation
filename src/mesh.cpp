@@ -2,9 +2,9 @@
 
 #define BUFFER_OFFSET(i) ((GLintptr)NULL + (i))
 
-size_t Mesh::count_meshes = 0;
+size_t MeshAsset::count_meshes = 0;
 
-Mesh::Mesh(std::string &filename)
+MeshAsset::MeshAsset(std::string &filename)
 {
 	count_meshes++;
 	m_vbo = count_meshes;
@@ -14,20 +14,11 @@ Mesh::Mesh(std::string &filename)
 	initVAO();
 }
 
-Mesh::~Mesh()
+MeshAsset::~MeshAsset()
 {
 }
 
-void Mesh::draw()
-{
-	glBindVertexArray(m_vao);
-
-	glDrawArrays(GL_TRIANGLES, 0, m_numberOfVertices);
-
-	glBindVertexArray(0);
-}
-
-void Mesh::loadObj(std::string & filename)
+void MeshAsset::loadObj(std::string & filename)
 {
 	std::ifstream obj_file(filename);
 	std::string line;
@@ -53,6 +44,7 @@ void Mesh::loadObj(std::string & filename)
 		if (word.compare("vn") == 0) {
 			float x, y, z;
 			ss >> x >> y >> z;
+
 			normals.push_back(x);
 			normals.push_back(y);
 			normals.push_back(z);
@@ -75,10 +67,10 @@ void Mesh::loadObj(std::string & filename)
 				i = std::stoi(index);
 
 				std::getline(ss2, index, '/');
-				j = std::stoi(index);
+				k = std::stoi(index);
 
 				std::getline(ss2, index, '/');
-				k = std::stoi(index);
+				j = std::stoi(index);
 				Vertex point;
 
 				//std::cout << i << " " << j << " " << k << std::endl;
@@ -137,7 +129,7 @@ void Mesh::loadObj(std::string & filename)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Mesh::initVAO()
+void MeshAsset::initVAO()
 {
 	if (glIsVertexArray(m_vao)) {
 		glDeleteVertexArrays(1, &m_vao);
@@ -161,8 +153,52 @@ void Mesh::initVAO()
 	glBindVertexArray(0);
 }
 
-void Mesh::destroy()
+void MeshAsset::destroy()
 {
 	glDeleteBuffers(1, &m_vbo);
 	glDeleteVertexArrays(1, &m_vao);
+}
+
+//////////////////////////////////////////////////////////
+
+MeshInstance::MeshInstance(MeshAsset * asset, glm::vec3 & pos, glm::vec3 & angles, float scale)
+{
+	m_asset = asset;
+	m_position = pos; 
+	m_angles = angles;
+	m_scale = scale;
+}
+
+void MeshInstance::draw(Program & prog, const glm::mat4 & view)
+{
+	updateModelMatrix();
+	glm::mat4 meshModel = m_modelMatrix;
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			std::cout << meshModel[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	prog.loadModelViewMatrix(view * meshModel);
+
+	glBindVertexArray(m_asset->m_vao);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_asset->m_numberOfVertices);
+
+	glBindVertexArray(0);
+}
+
+void MeshInstance::updateModelMatrix()
+{
+	glm::mat4 meshModel;
+
+	meshModel = glm::scale(meshModel, glm::vec3(m_scale));
+	meshModel = glm::rotate(meshModel, m_angles.x, glm::vec3(1, 0, 0));
+	meshModel = glm::rotate(meshModel, m_angles.y, glm::vec3(0, 1, 0));
+	meshModel = glm::rotate(meshModel, m_angles.z, glm::vec3(0, 0, 1));
+	meshModel = glm::translate(meshModel, m_position);
+
+	m_modelMatrix = meshModel;
 }

@@ -61,6 +61,7 @@ void initOpenGLContext(int argc, char** argv) {
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
+	glutSetOption(GLUT_MULTISAMPLE, 16);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(size_x, size_y);
 	glutCreateWindow("Hello OpenGL!");
@@ -81,9 +82,9 @@ int main(int argc, char** argv) {
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
 
-	Mesh m(std::string("../data/meshes/mesh_0.obj"));
+	MeshAsset mesh_asset(std::string("../data/meshes/plane.obj"));
 
-
+	MeshInstance instance_of_mesh(&mesh_asset);
 
 	float horizontalAngle = MY_PI;
 	float verticalAngle = 0.0f;
@@ -97,70 +98,74 @@ int main(int argc, char** argv) {
 
 	int frameTime = CLOCKS_PER_SEC / 60;
 	glm::vec3 position = glm::vec3(7, 10, 3.0);
-	glm::mat4 modelView;
+	glm::vec3 direction;
+	glm::vec3 left;
+	glm::vec3 up;
+	glm::mat4 view;
 	glm::mat4 proj;
 
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 	while (true) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glutMainLoopEvent();
-		deltaTime = (float)(clock() - time) / CLOCKS_PER_SEC;
-		time = clock();
-		horizontalAngle -= mouseSpeed * deltaTime * callbackStructure.dx;
-		callbackStructure.dx = 0;
-		verticalAngle += mouseSpeed * deltaTime * callbackStructure.dy;
-		callbackStructure.dy = 0;
+		{
+			glutMainLoopEvent();
+			deltaTime = (float)(clock() - time) / CLOCKS_PER_SEC;
+			time = clock();
+			horizontalAngle -= mouseSpeed * deltaTime * callbackStructure.dx;
+			callbackStructure.dx = 0;
+			verticalAngle += mouseSpeed * deltaTime * callbackStructure.dy;
+			callbackStructure.dy = 0;
 
-		glm::vec3 direction(
-			cos(verticalAngle) * sin(horizontalAngle),
-			cos(verticalAngle) * cos(horizontalAngle),
-			sin(verticalAngle)
-		);
+			direction = glm::vec3(
+				cos(verticalAngle) * sin(horizontalAngle),
+				cos(verticalAngle) * cos(horizontalAngle),
+				sin(verticalAngle)
+			);
 
-		glm::vec3 left = glm::vec3(
-			sin(horizontalAngle - 3.14f / 2.0f),
-			cos(horizontalAngle - 3.14f / 2.0f),
-			0
-		);
+			left = glm::vec3(
+				sin(horizontalAngle - 3.14f / 2.0f),
+				cos(horizontalAngle - 3.14f / 2.0f),
+				0
+			);
 
-		glm::vec3 up = -glm::cross(left, direction);
+			up = -glm::cross(left, direction);
 
-		if (callbackStructure.ascii_keys[(azerty_rules) ? 'z' : 'w']) {
-			position += deltaTime * speed * direction;
-			std::cout << deltaTime * speed << std::endl;
+			if (callbackStructure.ascii_keys[(azerty_rules) ? 'z' : 'w']) {
+				position += deltaTime * speed * direction;
+			}
+			if (callbackStructure.ascii_keys['s']) {
+				position -= deltaTime * speed *direction;
+			}
+			if (callbackStructure.ascii_keys['d']) {
+				position -= deltaTime * speed * left;
+			}
+			if (callbackStructure.ascii_keys[(azerty_rules) ? 'q' : 'a']) {
+				position += deltaTime * speed * left;
+			}
+			if (callbackStructure.ascii_keys['r']) {
+				position += deltaTime * speed * up;
+			}
+			if (callbackStructure.ascii_keys['f']) {
+				position -= deltaTime * speed * up;
+			}
+			if (callbackStructure.ascii_keys[27]) {
+				break;
+			}
 		}
-		if (callbackStructure.ascii_keys['s']) {
-			position -= deltaTime * speed *direction;
-		}
-		if (callbackStructure.ascii_keys['d']) {
-			position -= deltaTime * speed * left;
-		}
-		if (callbackStructure.ascii_keys[(azerty_rules) ? 'q' : 'a']) {
-			position += deltaTime * speed * left;
-		}
-		if (callbackStructure.ascii_keys['r']) {
-			position += deltaTime * speed * up;
-		}
-		if (callbackStructure.ascii_keys['f']) {
-			position -= deltaTime * speed * up;
-		}
-		if (callbackStructure.ascii_keys[27]) {
-			break;
-		}
-
-		modelView = glm::lookAt(position, position + direction, up);
+		view = glm::lookAt(position, position + direction, up);
 		proj = glm::perspective(initialFOV, (float)size_x / size_y, 0.01f, 1000.0f);
-
+	
 		prog.useProgram();
-		prog.loadModelViewMatrix(modelView);
-		prog.loadProjMatrix(proj);
 
-		m.draw();
+		prog.loadProjMatrix(proj);
+		instance_of_mesh.draw(prog, view);
 
 		prog.stopUseProgram();
 		glutSwapBuffers();
 	}
 
-
+	prog.destroy();
+	mesh_asset.destroy();
 	return 0;
 }

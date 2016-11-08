@@ -2,11 +2,16 @@
 
 #include <GL/glew.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <iostream>
+
+#include "program.h"
 
 struct Vertex {
 	int index;
@@ -15,13 +20,15 @@ struct Vertex {
 	float t_x, t_y;
 };
 
-class Mesh
+class MeshAsset
 {
-public:
-	Mesh(std::string & filename);
-	~Mesh();
+	friend class MeshInstance;
 
-	void draw();
+
+public:
+	MeshAsset(std::string & filename);
+	~MeshAsset();
+
 	void destroy();
 
 private:
@@ -34,5 +41,28 @@ private:
 
 	void loadObj(std::string &filename);
 	void initVAO();
+
+	glm::vec3 m_position;
+	glm::vec3 m_angles;
+	float m_scale;
+
+	glm::mat4 m_modelMatrix;
+};
+
+class MeshInstance {
+public:
+	MeshInstance(MeshAsset* asset, glm::vec3 &pos = glm::vec3(0, 0, 0), glm::vec3 &angles = glm::vec3(0, 0, 0), float scale = 1.0f);
+	void draw(Program &prog, const glm::mat4 &view);
+
+private:
+	MeshAsset* m_asset;
+
+	glm::vec3 m_position;
+	glm::vec3 m_angles;
+	float m_scale;
+
+	glm::mat4 m_modelMatrix;
+
+	void updateModelMatrix();
 };
 
