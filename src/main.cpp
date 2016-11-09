@@ -1,7 +1,13 @@
 
 #include <GL/glew.h>
-#include <GL/glut.h>
+
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <GLUT/glut.h>
+
+//#include <GL/glut.h>
 #include <GL/freeglut.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -61,10 +67,12 @@ void initOpenGLContext(int argc, char** argv) {
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
+  glutInitContextVersion(4,1);
 	glutSetOption(GLUT_MULTISAMPLE, 16);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(size_x, size_y);
 	glutCreateWindow("Hello OpenGL!");
+
 
 	glutDisplayFunc(display);
 	glutMouseFunc(mouseCallback);

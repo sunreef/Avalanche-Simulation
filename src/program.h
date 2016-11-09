@@ -18,7 +18,7 @@ public:
 	void useProgram();
 	void stopUseProgram();
 
-	void loadModelViewMatrix(glm::mat4 &modelView);
+	void loadModelViewMatrix(const glm::mat4 &modelView);
 	void loadProjMatrix(glm::mat4 &proj);
 
 	void destroy();

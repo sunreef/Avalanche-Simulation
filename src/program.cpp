@@ -21,7 +21,7 @@ void Program::stopUseProgram()
 	glUseProgram(0);
 }
 
-void Program::loadModelViewMatrix(glm::mat4 & modelView)
+void Program::loadModelViewMatrix(const glm::mat4 & modelView)
 {
 	GLint matrixLocation = glGetUniformLocation(m_program, "modelView");
 	if (matrixLocation < 0) {
@@ -52,7 +52,7 @@ void Program::loadShaders(std::string vertexShaderFilename, std::string fragment
 
 	std::ifstream is(vertexShaderFilename);
 	if (is) {
-		std::string buf(std::istreambuf_iterator<char>(is), {});
+		std::string buf(std::istreambuf_iterator<char>(is), (std::istreambuf_iterator<char>()));
 
 		vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 		const GLchar* buffer = buf.c_str();
@@ -76,7 +76,8 @@ void Program::loadShaders(std::string vertexShaderFilename, std::string fragment
 
 	std::ifstream is2(fragmentShaderFilename);
 	if (is2) {
-		std::string buf(std::istreambuf_iterator<char>(is2), {});
+//		std::string buf(std::istreambuf_iterator<char>(is2), {});
+		std::string buf(std::istreambuf_iterator<char>(is2), (std::istreambuf_iterator<char>()));
 
 		fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 		const GLchar* buffer = buf.c_str();
