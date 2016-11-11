@@ -149,9 +149,7 @@ public:
 		}
 
 		view = glm::lookAt(position, position + direction, up);
-
 		proj = glm::perspective(glm::radians(fov), (float)size_x / size_y, 0.01f, 1000.0f);
-
 		return true;
 	}
 };

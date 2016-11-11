@@ -50,7 +50,6 @@ int main(int argc, char** argv) {
 	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Avalanche simulation", monitor, NULL);
 	glfwMakeContextCurrent(window);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, keyboardCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetCursorPosCallback(window, mouseMotionCallback);
