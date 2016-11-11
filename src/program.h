@@ -20,6 +20,7 @@ public:
 
 	void loadModelViewMatrix(glm::mat4 &modelView);
 	void loadProjMatrix(glm::mat4 &proj);
+	void loadColorUniform(glm::vec3 &color);
 
 	void destroy();
 

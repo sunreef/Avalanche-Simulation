@@ -9,7 +9,9 @@
 #include <time.h>
 #include <chrono>
 #include <thread>
+#include <random>
 #include <cmath>
+#include <algorithm>
 
 #include "mesh.h"
 #include "program.h"
@@ -84,7 +86,22 @@ int main(int argc, char** argv) {
 
 	MeshAsset mesh_asset(std::string("../data/meshes/plane.obj"));
 
+	MeshAsset particle_asset(std::string("../data/meshes/sphere.obj"));
+
 	MeshInstance instance_of_mesh(&mesh_asset);
+
+
+	std::vector<MeshInstance> particles;
+
+	for (int p = 0; p < 100000; p++) {
+
+		float x = (float)(rand() % 5000) / 1000;
+		float y = (float)(rand() % 5000) / 1000;
+		float z = (float)(rand() % 5000) / 1000;
+
+		particles.push_back(MeshInstance(&particle_asset, glm::vec3(x, y, z), glm::vec3(0,0,0), 0.05));
+	}
+
 
 	float horizontalAngle = MY_PI;
 	float verticalAngle = 0.0f;
@@ -112,9 +129,9 @@ int main(int argc, char** argv) {
 			glutMainLoopEvent();
 			deltaTime = (float)(clock() - time) / CLOCKS_PER_SEC;
 			time = clock();
-			horizontalAngle -= mouseSpeed * deltaTime * callbackStructure.dx;
+			horizontalAngle -= mouseSpeed * std::min(deltaTime, 0.03f) * callbackStructure.dx;
 			callbackStructure.dx = 0;
-			verticalAngle += mouseSpeed * deltaTime * callbackStructure.dy;
+			verticalAngle += mouseSpeed *  std::min(deltaTime, 0.03f) * callbackStructure.dy;
 			callbackStructure.dy = 0;
 
 			direction = glm::vec3(
@@ -161,6 +178,9 @@ int main(int argc, char** argv) {
 		prog.loadProjMatrix(proj);
 		instance_of_mesh.draw(prog, view);
 
+		for (auto instance : particles) {
+			instance.draw(prog, view);
+		}
 		prog.stopUseProgram();
 		glutSwapBuffers();
 	}

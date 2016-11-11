@@ -41,6 +41,12 @@ void Program::loadProjMatrix(glm::mat4 & proj)
 	glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, glm::value_ptr(proj));
 }
 
+void Program::loadColorUniform(glm::vec3 & color)
+{
+	GLint colorLocation = glGetUniformLocation(m_program, "color");
+	glUniform3f(colorLocation, color[0], color[1], color[2]);
+}
+
 void Program::destroy()
 {
 	glDeleteProgram(m_program);

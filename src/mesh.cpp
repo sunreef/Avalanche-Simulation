@@ -56,7 +56,7 @@ void MeshAsset::loadObj(std::string & filename)
 			textures.push_back(y);
 		}
 		if (word.compare("f") == 0) {
-		
+
 			std::string vertex;
 			for (int v = 0; v < 3; v++) {
 				int i, j, k;
@@ -161,12 +161,13 @@ void MeshAsset::destroy()
 
 //////////////////////////////////////////////////////////
 
-MeshInstance::MeshInstance(MeshAsset * asset, glm::vec3 & pos, glm::vec3 & angles, float scale)
+MeshInstance::MeshInstance(MeshAsset * asset, const glm::vec3 & pos, const glm::vec3 & angles, float scale)
 {
 	m_asset = asset;
-	m_position = pos; 
+	m_position = pos;
 	m_angles = angles;
 	m_scale = scale;
+	m_color = glm::vec3((float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000);
 }
 
 void MeshInstance::draw(Program & prog, const glm::mat4 & view)
@@ -174,12 +175,7 @@ void MeshInstance::draw(Program & prog, const glm::mat4 & view)
 	updateModelMatrix();
 	glm::mat4 meshModel = m_modelMatrix;
 
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << meshModel[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
+	prog.loadColorUniform(m_color);
 
 	prog.loadModelViewMatrix(view * meshModel);
 
@@ -190,15 +186,30 @@ void MeshInstance::draw(Program & prog, const glm::mat4 & view)
 	glBindVertexArray(0);
 }
 
+void MeshInstance::setPosition(const glm::vec3 & position)
+{
+	m_position = position;
+}
+
+void MeshInstance::setAngles(const glm::vec3 & angles)
+{
+	m_angles = angles;
+}
+
+void MeshInstance::setScale(float scale)
+{
+	m_scale = scale;
+}
+
 void MeshInstance::updateModelMatrix()
 {
 	glm::mat4 meshModel;
-
-	meshModel = glm::scale(meshModel, glm::vec3(m_scale));
-	meshModel = glm::rotate(meshModel, m_angles.x, glm::vec3(1, 0, 0));
-	meshModel = glm::rotate(meshModel, m_angles.y, glm::vec3(0, 1, 0));
-	meshModel = glm::rotate(meshModel, m_angles.z, glm::vec3(0, 0, 1));
 	meshModel = glm::translate(meshModel, m_position);
+	meshModel = glm::scale(meshModel, glm::vec3(m_scale));
+	meshModel = glm::rotate(meshModel, glm::radians(m_angles.x), glm::vec3(1, 0, 0));
+	meshModel = glm::rotate(meshModel, glm::radians(m_angles.y), glm::vec3(0, 1, 0));
+	meshModel = glm::rotate(meshModel, glm::radians(m_angles.z), glm::vec3(0, 0, 1));
+
 
 	m_modelMatrix = meshModel;
 }
