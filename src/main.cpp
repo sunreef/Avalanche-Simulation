@@ -36,18 +36,37 @@ void scrollCallback(GLFWwindow* window, double x_offset, double y_offset) {
 	eventHandler.scrollCallback(window, x_offset, y_offset);
 }
 
+void errorCallback(int error, const char* description) {
+    fprintf(stderr, "Error: %s\n", description);
+}
+
 int main(int argc, char** argv) {
 
-	glfwInit();
+	if (!glfwInit()) {
+    fprintf(stderr, "[ERROR] Failed to init GLFW\n");
+    exit;
+  }
+  glfwSetErrorCallback(errorCallback);
 
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_SAMPLES, 16);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Avalanche simulation", monitor, NULL);
+  if (window == NULL) {
+    fprintf(stderr, "[ERROR] Failed to create GLFW window\n");
+    exit;
+  }
+
+  int major, minor, rev;
+  glfwGetVersion(&major, &minor, &rev);
+  fprintf(stderr, "GLFW version : %d.%d.%d\n", major, minor, rev);
+
 	glfwMakeContextCurrent(window);
 
 	glfwSetKeyCallback(window, keyboardCallback);
@@ -58,6 +77,7 @@ int main(int argc, char** argv) {
 	eventHandler.initHandler(window);
 
 	glewInit();
+  fprintf(stderr, "OpenGL version : %s\n", glGetString(GL_VERSION));
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
 
