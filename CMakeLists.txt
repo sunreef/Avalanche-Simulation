@@ -12,11 +12,11 @@ add_executable(Avalanche ${Sources} ${Headers})
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
-set(FREEGLUT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/include)
+set(GLFW_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GLFW/include)
 if (UNIX)
   set(FREEGLUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/libglut.dylib) 
 else()
-  set(FREEGLUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/freeglut.lib ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/freeglutd.lib)
+  set(GLFW_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/GLFW/lib/glfw3.lib)
 endif()
 
 include_directories(${GLUT_INCLUDE_DIRS})
@@ -30,6 +30,6 @@ endif()
 
 set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GLM/include)
 
-include_directories( ${OPENGL_INCLUDE_DIRS}  ${FREEGLUT_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${GLM_INCLUDE_DIR})
+include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLFW_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${GLM_INCLUDE_DIR})
 
-target_link_libraries(Avalanche ${OPENGL_LIBRARIES} ${FREEGLUT_LIBRARY} ${GLEW_LIBRARY})
+target_link_libraries(Avalanche ${OPENGL_LIBRARIES} ${GLFW_LIBRARY} ${GLEW_LIBRARY})
