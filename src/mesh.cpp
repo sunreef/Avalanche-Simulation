@@ -4,7 +4,7 @@
 
 size_t MeshAsset::count_meshes = 0;
 
-MeshAsset::MeshAsset(std::string &filename)
+MeshAsset::MeshAsset(const std::string &filename)
 {
 	count_meshes++;
 	m_vbo = count_meshes;
@@ -18,7 +18,7 @@ MeshAsset::~MeshAsset()
 {
 }
 
-void MeshAsset::loadObj(std::string & filename)
+void MeshAsset::loadObj(const std::string & filename)
 {
 	std::ifstream obj_file(filename);
 	std::string line;

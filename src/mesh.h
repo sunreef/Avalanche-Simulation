@@ -26,7 +26,7 @@ class MeshAsset
 
 
 public:
-	MeshAsset(std::string & filename);
+	MeshAsset(const std::string& filename);
 	~MeshAsset();
 
 	void destroy();
@@ -39,7 +39,7 @@ private:
 
 	int m_numberOfVertices;
 
-	void loadObj(std::string &filename);
+	void loadObj(const std::string &filename);
 	void initVAO();
 
 	glm::vec3 m_position;

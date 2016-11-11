@@ -7,13 +7,26 @@ file(GLOB Sources "src/*.cpp")
 file(GLOB Headers "src/*.h")
 
 add_executable(Avalanche ${Sources} ${Headers})
+
+# OpenGL
 find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
 
 set(FREEGLUT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/include)
-set(FREEGLUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/freeglut.lib ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/freeglutd.lib)
+if (UNIX)
+  set(FREEGLUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/libglut.dylib) 
+else()
+  set(FREEGLUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/freeglut.lib ${CMAKE_CURRENT_SOURCE_DIR}/FreeGLUT/lib/freeglutd.lib)
+endif()
+
+include_directories(${GLUT_INCLUDE_DIRS})
 
 set(GLEW_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GLEW/include)
-set(GLEW_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/GLEW/lib/glew32.lib)
+if (UNIX)
+  set(GLEW_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/GLEW/lib/libGLEW.dylib)
+else()
+  set(GLEW_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/GLEW/lib/glew32.lib)
+endif()
 
 set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/GLM/include)
 
