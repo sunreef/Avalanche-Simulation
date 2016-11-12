@@ -19,15 +19,15 @@ public:
 
 
 private:
-	float speed = 12.0f;
-	float mouseSpeed = 0.1f;
-	float zoomSpeed = 5.0f;
+	float speed = 12.0;
+	float mouseSpeed = 0.1;
+	float zoomSpeed = 5.0;
 
 	float deltaTime;
 	clock_t time;
 
-	int x, y;
-	int dx, dy;
+	float x, y;
+	float dx, dy;
 
 	bool keys[349];
 	bool mouse_buttons[8];
@@ -54,7 +54,7 @@ public:
 		}
 
 		position = glm::vec3(0, 0, 0);
-		horizontalAngle = MY_PI;
+		horizontalAngle = 0.0f;
 		verticalAngle = 0.0f;
 
 		fov = 45.0f;
@@ -123,7 +123,7 @@ public:
 			0
 		);
 
-		glm::vec3 up = -glm::cross(left, direction);
+		glm::vec3 up = glm::cross(direction, left);
 
 		if (keys[GLFW_KEY_W]) {
 			position += deltaTime * speed * direction;

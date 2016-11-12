@@ -42,7 +42,6 @@ void errorCallback(int error, const char* description) {
 }
 
 int main(int argc, char** argv) {
-
 	if (!glfwInit()) {
 		fprintf(stderr, "[ERROR] Failed to init GLFW\n");
 		exit;
@@ -81,22 +80,9 @@ int main(int argc, char** argv) {
 	glewInit();
 	fprintf(stderr, "OpenGL version : %s\n", glGetString(GL_VERSION));
 
-	Scene scene;
+	Scene scene("../data/particle_configurations/config_1.txt");
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
-
-	MeshAsset mesh_asset(std::string("../data/meshes/plane.obj"));
-	MeshAsset particle_asset(std::string("../data/meshes/sphere.obj"));
-
-	MeshInstance instance_of_mesh(&mesh_asset);
-	std::vector<MeshInstance> particles;
-
-	for (int p = 0; p < 10000; p++) {
-		float x = (float)(rand() % 5000) / 1000;
-		float y = (float)(rand() % 5000) / 1000;
-		float z = (float)(rand() % 5000) / 1000;
-		particles.push_back(MeshInstance(&particle_asset, glm::vec3(x, y, z), glm::vec3(0, 0, 0), 0.05));
-	}
 
 	glm::mat4 view;
 	glm::mat4 proj;
@@ -111,11 +97,10 @@ int main(int argc, char** argv) {
 		prog.useProgram();
 
 		prog.loadProjMatrix(proj);
-		instance_of_mesh.draw(prog, view);
 
-		for (auto instance : particles) {
-			instance.draw(prog, view);
-		}
+		scene.update();
+		scene.draw(prog, view);
+
 		prog.stopUseProgram();
 		glfwSwapBuffers(window);
 
@@ -124,9 +109,6 @@ int main(int argc, char** argv) {
 		}
 	}
 	prog.destroy();
-	mesh_asset.destroy();
-	particle_asset.destroy();
-
 	glfwTerminate();
 	return 0;
 }

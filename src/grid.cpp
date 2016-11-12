@@ -1,7 +1,12 @@
 #include "grid.h"
 
 
-Grid::Grid(glm::vec3 corner, double scale) : m_corner(corner), m_scale(scale), m_invScale(1.0 / scale), m_sizeX(1), m_sizeY(1), m_sizeZ(1)
+Grid::Grid(glm::vec3 corner, float scale) : m_corner(corner),
+m_scale(scale),
+m_invScale(1.0 / scale),
+m_sizeX(1),
+m_sizeY(1),
+m_sizeZ(1)
 {
 	m_cells = std::vector<std::vector<std::vector<Cell> > >(1, std::vector<std::vector<Cell> >(1, std::vector<Cell>(1)));
 }
@@ -13,9 +18,9 @@ Grid::~Grid()
 bool Grid::insertParticles(const std::vector<Particle*>::iterator & begin, const std::vector<Particle*>::iterator & end)
 {
 	for (auto it = begin; it != end; it++) {
-		double x = (*it)->position.x;
-		double y = (*it)->position.y;
-		double z = (*it)->position.z;
+		float x = (*it)->position.x;
+		float y = (*it)->position.y;
+		float z = (*it)->position.z;
 
 		while (x >= m_corner.x + m_sizeX * m_scale) {
 			m_cells.push_back(std::vector<std::vector<Cell> >(m_sizeY, std::vector<Cell>(m_sizeZ)));
@@ -51,7 +56,9 @@ bool Grid::insertParticles(const std::vector<Particle*>::iterator & begin, const
 
 void Grid::computeNeighbours()
 {
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
 	for (int x = 0; x < m_sizeX; x++) {
 		for (int y = 0; y < m_sizeY; y++) {
 			for (int z = 0; z < m_sizeZ; z++) {
@@ -59,20 +66,25 @@ void Grid::computeNeighbours()
 					continue;
 				}
 				std::set<Particle*> neighbours;
+				int searchRadius = 1;
 
-				int xMin = std::max(0, x - 1);
-				int xMax = std::min(m_sizeX, x + 2);
-				int yMin = std::max(0, y - 1);
-				int yMax = std::min(m_sizeY, y + 2);
-				int zMin = std::max(0, z - 1);
-				int zMax = std::min(m_sizeZ, z + 2);
+				while (neighbours.size() <= 1) {
+					neighbours.clear();
+					int xMin = std::max(0, x - searchRadius);
+					int xMax = std::min(m_sizeX, x + searchRadius + 1);
+					int yMin = std::max(0, y - searchRadius);
+					int yMax = std::min(m_sizeY, y + searchRadius + 1);
+					int zMin = std::max(0, z - searchRadius);
+					int zMax = std::min(m_sizeZ, z + searchRadius + 1);
 
-				for (int x2 = xMin; x2 < xMax; x2++) {
-					for (int y2 = yMin; y2 < yMax; y2++) {
-						for (int z2 = zMin; z2 < zMax; z2++) {
-							neighbours.insert(std::begin(m_cells[x2][y2][z2].particles), std::end(m_cells[x2][y2][z2].particles));
+					for (int x2 = xMin; x2 < xMax; x2++) {
+						for (int y2 = yMin; y2 < yMax; y2++) {
+							for (int z2 = zMin; z2 < zMax; z2++) {
+								neighbours.insert(std::begin(m_cells[x2][y2][z2].particles), std::end(m_cells[x2][y2][z2].particles));
+							}
 						}
 					}
+					searchRadius++;
 				}
 
 				for (Particle* p : m_cells[x][y][z].particles) {

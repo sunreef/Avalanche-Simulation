@@ -15,12 +15,12 @@ public:
 	Program(std::string vertexShaderFilename, std::string fragmentShaderFilename);
 	~Program();
 
-	void useProgram();
-	void stopUseProgram();
+	void useProgram() const;
+	void stopUseProgram() const;
 
-	void loadModelViewMatrix(const glm::mat4 &modelView);
-	void loadProjMatrix(glm::mat4 &proj);
-	void loadColorUniform(glm::vec3 &color);
+	void loadModelViewMatrix(const glm::mat4 &modelView) const;
+	void loadProjMatrix(const glm::mat4 &proj) const;
+	void loadColorUniform(const glm::vec3 &color) const;
 
 	void destroy();
 

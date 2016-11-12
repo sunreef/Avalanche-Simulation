@@ -170,7 +170,7 @@ MeshInstance::MeshInstance(MeshAsset * asset, const glm::vec3 & pos, const glm::
 	m_color = glm::vec3((float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000);
 }
 
-void MeshInstance::draw(Program & prog, const glm::mat4 & view)
+void MeshInstance::draw(const Program & prog, const glm::mat4 & view)
 {
 	updateModelMatrix();
 	glm::mat4 meshModel = m_modelMatrix;
@@ -199,6 +199,11 @@ void MeshInstance::setAngles(const glm::vec3 & angles)
 void MeshInstance::setScale(float scale)
 {
 	m_scale = scale;
+}
+
+void MeshInstance::setColor(const glm::vec3 & color)
+{
+	m_color = color;
 }
 
 void MeshInstance::updateModelMatrix()
