@@ -16,6 +16,7 @@
 #include "mesh.h"
 #include "program.h"
 #include "event_processing.h"
+#include "scene.h"
 
 
 EventProcessing eventHandler;
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
 
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Avalanche simulation", monitor, NULL);
+	GLFWwindow* window = glfwCreateWindow(mode->width * 0.6, mode->height * 0.6, "Avalanche simulation", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
 	glfwSetKeyCallback(window, keyboardCallback);
@@ -58,6 +59,8 @@ int main(int argc, char** argv) {
 	eventHandler.initHandler(window);
 
 	glewInit();
+
+	Scene scene;
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
 

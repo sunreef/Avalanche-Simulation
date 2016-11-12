@@ -13,6 +13,7 @@ public:
 
 
 private:
+	MeshAsset m_particleAsset;
 	std::vector<Particle*> m_particles;
 	Grid m_grid;
 };
