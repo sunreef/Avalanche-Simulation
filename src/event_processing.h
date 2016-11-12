@@ -101,7 +101,7 @@ public:
 	}
 
 	bool processEvents(glm::mat4 &view, glm::mat4 &proj) {
-		deltaTime = (float)(clock() - time) / CLOCKS_PER_SEC;
+		deltaTime = std::min(0.02f, (float)(clock() - time) / CLOCKS_PER_SEC);
 		time = clock();
 
 		if (mouse_buttons[GLFW_MOUSE_BUTTON_1]) {
