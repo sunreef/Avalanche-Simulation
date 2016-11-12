@@ -190,7 +190,6 @@ void FluidEngine::updatePositionAndSpeed()
 			p->velocity.z *= -1;
 		}
 		p->instance.setPosition(p->position);
-
 		p->instance.setColor(glm::vec3(norm/5.0, norm/5.0, 1.0));
 	}
 	m_timeStep = newTimeStep;

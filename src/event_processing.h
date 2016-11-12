@@ -53,9 +53,9 @@ public:
 			mouse_buttons[i] = false;
 		}
 
-		position = glm::vec3(0, 0, 0);
-		horizontalAngle = 0.0f;
-		verticalAngle = 0.0f;
+		position = glm::vec3(-2, -2, 2);
+		horizontalAngle = MY_PI / 4;
+		verticalAngle = - MY_PI / 9;
 
 		fov = 45.0f;
 	}
