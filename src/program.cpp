@@ -11,17 +11,17 @@ Program::~Program()
 {
 }
 
-void Program::useProgram()
+void Program::useProgram() const
 {
 	glUseProgram(m_program);
 }
 
-void Program::stopUseProgram()
+void Program::stopUseProgram() const
 {
 	glUseProgram(0);
 }
 
-void Program::loadModelViewMatrix(const glm::mat4 & modelView)
+void Program::loadModelViewMatrix(const glm::mat4 & modelView) const
 {
 	GLint matrixLocation = glGetUniformLocation(m_program, "modelView");
 	if (matrixLocation < 0) {
@@ -31,7 +31,7 @@ void Program::loadModelViewMatrix(const glm::mat4 & modelView)
 	glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, glm::value_ptr(modelView));
 }
 
-void Program::loadProjMatrix(glm::mat4 & proj)
+void Program::loadProjMatrix(const glm::mat4 & proj) const
 {
 	GLint matrixLocation = glGetUniformLocation(m_program, "proj");
 	if (matrixLocation < 0) {
@@ -41,7 +41,7 @@ void Program::loadProjMatrix(glm::mat4 & proj)
 	glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, glm::value_ptr(proj));
 }
 
-void Program::loadColorUniform(glm::vec3 & color)
+void Program::loadColorUniform(const glm::vec3 & color) const
 {
 	GLint colorLocation = glGetUniformLocation(m_program, "color");
 	glUniform3f(colorLocation, color[0], color[1], color[2]);

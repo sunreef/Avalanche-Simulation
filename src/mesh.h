@@ -52,11 +52,12 @@ private:
 class MeshInstance {
 public:
 	MeshInstance(MeshAsset* asset, const glm::vec3 &pos = glm::vec3(0, 0, 0), const glm::vec3 &angles = glm::vec3(0, 0, 0), float scale = 1.0f);
-	void draw(Program &prog, const glm::mat4 &view);
+	void draw(const Program &prog, const glm::mat4 &view);
 
 	void setPosition(const glm::vec3& position);
 	void setAngles(const glm::vec3& angles);
 	void setScale(float scale);
+	void setColor(const glm::vec3& color);
 
 private:
 	MeshAsset* m_asset;

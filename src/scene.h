@@ -2,18 +2,18 @@
 
 #include <vector>
 
-#include "grid.h"
-#include "particle.h"
+#include "fluid_engine.h"
 
 class Scene
 {
 public:
-	Scene();
+	Scene(const std::string& initial_configuration);
 	~Scene();
 
+	void update();
+	void draw(const Program &prog, const glm::mat4& view);
 
 private:
-	std::vector<Particle*> m_particles;
-	Grid m_grid;
+	FluidEngine m_fluid;
 };
 

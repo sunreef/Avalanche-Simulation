@@ -1,12 +1,21 @@
 #include "scene.h"
 
 
-
-Scene::Scene(): m_grid(glm::vec3(0,0,0), 0.1)
+Scene::Scene(const std::string& initial_configuration): m_fluid(initial_configuration)
 {
 }
 
-
 Scene::~Scene()
 {
+
+}
+
+void Scene::update()
+{
+	m_fluid.nextStep();
+}
+
+void Scene::draw(const Program & prog, const glm::mat4 & view)
+{
+	m_fluid.draw(prog, view);
 }
