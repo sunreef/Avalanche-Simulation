@@ -144,7 +144,6 @@ public:
 			position -= deltaTime * speed * up;
 		}
 		if (keys[GLFW_KEY_ESCAPE]) {
-			glfwTerminate();
 			return false;
 		}
 

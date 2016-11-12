@@ -37,18 +37,38 @@ void scrollCallback(GLFWwindow* window, double x_offset, double y_offset) {
 	eventHandler.scrollCallback(window, x_offset, y_offset);
 }
 
+void errorCallback(int error, const char* description) {
+	fprintf(stderr, "Error: %s\n", description);
+}
+
 int main(int argc, char** argv) {
 
-	glfwInit();
+	if (!glfwInit()) {
+		fprintf(stderr, "[ERROR] Failed to init GLFW\n");
+		exit;
+	}
+	glfwSetErrorCallback(errorCallback);
 
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 16);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-	glfwWindowHint(GLFW_SAMPLES, 16);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-	GLFWwindow* window = glfwCreateWindow(mode->width * 0.6, mode->height * 0.6, "Avalanche simulation", NULL, NULL);
+
+	GLFWwindow* window = glfwCreateWindow(mode->width * 0.8, mode->height * 0.8, "Avalanche simulation", NULL, NULL);
+	if (window == NULL) {
+		fprintf(stderr, "[ERROR] Failed to create GLFW window\n");
+		exit;
+	}
+
+	int major, minor, rev;
+	glfwGetVersion(&major, &minor, &rev);
+	fprintf(stderr, "GLFW version : %d.%d.%d\n", major, minor, rev);
+
 	glfwMakeContextCurrent(window);
 
 	glfwSetKeyCallback(window, keyboardCallback);
@@ -59,6 +79,7 @@ int main(int argc, char** argv) {
 	eventHandler.initHandler(window);
 
 	glewInit();
+	fprintf(stderr, "OpenGL version : %s\n", glGetString(GL_VERSION));
 
 	Scene scene;
 
@@ -78,7 +99,7 @@ int main(int argc, char** argv) {
 	}
 
 	glm::mat4 view;
-	glm::mat4 proj /*= glm::perspective(initialFOV, (float)size_x / size_y, 0.01f, 1000.0f)*/;
+	glm::mat4 proj;
 
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
@@ -102,9 +123,10 @@ int main(int argc, char** argv) {
 			break;
 		}
 	}
-
 	prog.destroy();
 	mesh_asset.destroy();
 	particle_asset.destroy();
+
+	glfwTerminate();
 	return 0;
 }
