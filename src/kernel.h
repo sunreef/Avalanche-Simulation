@@ -72,7 +72,7 @@ public:
 
 class ExponentialKernel : public Kernel {
 public:
-	ExponentialKernel(float smoothingLength = 0.1f) : Kernel(smoothingLength) {}
+	ExponentialKernel(float smoothingLength = 0.1f) : Kernel(smoothingLength), sigma(1.0f / (std::pow(M_PI, 1.5)) * m_invCubeSmoothingLength) {}
 	~ExponentialKernel() {}
 
 	float evaluate(float q) const override {		
@@ -84,5 +84,5 @@ public:
 	}
 
 private:
-	float sigma = 1.0f / (std::pow(M_PI, 1.5));
+	float sigma;
 };

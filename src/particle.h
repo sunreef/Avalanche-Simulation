@@ -8,7 +8,7 @@
 struct Particle
 {
 
-	Particle(MeshAsset* particle_asset,const float &size, const float &rest_density, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 velocity = glm::vec3(0,0,0));
+	Particle(MeshAsset* particle_asset,const float &size, const float &rest_density, bool meshParticle = false, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 velocity = glm::vec3(0,0,0));
 	~Particle();
 
 	MeshInstance instance;
@@ -17,11 +17,14 @@ struct Particle
 
 	float size;
 	float mass;
+	float volume;
 	glm::vec3 position;
 	glm::vec3 velocity;
 	float density;
 	float pressure;
 
 	glm::vec3 localForce;
+
+	bool isMeshParticle;
 };
 

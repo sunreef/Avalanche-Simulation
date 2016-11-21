@@ -12,6 +12,7 @@ public:
 
 	void update();
 	void draw(const Program &prog, const glm::mat4& view);
+	float getTime();
 
 private:
 	FluidEngine m_fluid;

@@ -68,7 +68,7 @@ void Grid::computeNeighbours()
 				std::set<Particle*> neighbours;
 				int searchRadius = 1;
 
-				while (neighbours.size() <= 1) {
+				//while (neighbours.size() <= 1) {
 					neighbours.clear();
 					int xMin = std::max(0, x - searchRadius);
 					int xMax = std::min(m_sizeX, x + searchRadius + 1);
@@ -84,8 +84,8 @@ void Grid::computeNeighbours()
 							}
 						}
 					}
-					searchRadius++;
-				}
+				//	searchRadius++;
+				//}
 
 				for (Particle* p : m_cells[x][y][z].particles) {
 					p->neighbours = neighbours;

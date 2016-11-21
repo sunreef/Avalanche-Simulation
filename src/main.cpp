@@ -84,6 +84,9 @@ int main(int argc, char** argv) {
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
 
+	MeshAsset mesh_asset("../data/meshes/plane.obj");
+	MeshInstance mesh_instance(&mesh_asset);
+
 	glm::mat4 view;
 	glm::mat4 proj;
 
@@ -100,6 +103,9 @@ int main(int argc, char** argv) {
 
 		scene.update();
 		scene.draw(prog, view);
+		//mesh_instance.draw(prog, view);
+
+		std::cout << "Total time: " << scene.getTime() << " seconds." << std::endl;
 
 		prog.stopUseProgram();
 		glfwSwapBuffers(window);
