@@ -4,13 +4,13 @@
 
 size_t MeshAsset::count_meshes = 0;
 
-MeshAsset::MeshAsset(const std::string &filename)
+MeshAsset::MeshAsset(const std::string &filename, bool sample)
 {
 	count_meshes++;
 	m_vbo = count_meshes;
 	m_vao = count_meshes;
 
-	loadObj(filename);
+	loadObj(filename, sample);
 	initVAO();
 }
 
@@ -18,7 +18,7 @@ MeshAsset::~MeshAsset()
 {
 }
 
-void MeshAsset::loadObj(const std::string & filename)
+void MeshAsset::loadObj(const std::string & filename, bool sample)
 {
 	std::ifstream obj_file(filename);
 	std::string line;
@@ -26,8 +26,6 @@ void MeshAsset::loadObj(const std::string & filename)
 	std::vector<float> positions;
 	std::vector<float> normals;
 	std::vector<float> textures;
-
-	std::vector<Vertex> vertices;
 
 	while (std::getline(obj_file, line)) {
 		std::stringstream ss(line);
@@ -90,28 +88,32 @@ void MeshAsset::loadObj(const std::string & filename)
 				point.t_x = textures[2 * k];
 				point.t_y = textures[2 * k + 1];
 
-				vertices.push_back(point);
+				m_vertices.push_back(point);
 			}
 		}
 	}
 
-	m_numberOfVertices = vertices.size();
+  if (sample) {
+    return;
+  }
 
-	std::vector<float> final_positions(3 * vertices.size());
-	std::vector<float> final_normals(3 * vertices.size());
-	std::vector<float> final_textures(2 * vertices.size());
+	m_numberOfVertices = m_vertices.size();
 
-	for (int v = 0; v < vertices.size(); v++) {
-		final_positions[3 * v] = vertices[v].x;
-		final_positions[3 * v + 1] = vertices[v].y;
-		final_positions[3 * v + 2] = vertices[v].z;
+	std::vector<float> final_positions(3 * m_vertices.size());
+	std::vector<float> final_normals(3 * m_vertices.size());
+	std::vector<float> final_textures(2 * m_vertices.size());
 
-		final_normals[3 * v] = vertices[v].n_x;
-		final_normals[3 * v + 1] = vertices[v].n_y;
-		final_normals[3 * v + 2] = vertices[v].n_z;
+	for (int v = 0; v < m_vertices.size(); v++) {
+		final_positions[3 * v] = m_vertices[v].x;
+		final_positions[3 * v + 1] = m_vertices[v].y;
+		final_positions[3 * v + 2] = m_vertices[v].z;
 
-		final_textures[2 * v] = vertices[v].t_x;
-		final_textures[2 * v + 1] = vertices[v].t_y;
+		final_normals[3 * v] = m_vertices[v].n_x;
+		final_normals[3 * v + 1] = m_vertices[v].n_y;
+		final_normals[3 * v + 2] = m_vertices[v].n_z;
+
+		final_textures[2 * v] = m_vertices[v].t_x;
+		final_textures[2 * v + 1] = m_vertices[v].t_y;
 	}
 
 	if (glIsBuffer(m_vbo)) {
@@ -121,12 +123,14 @@ void MeshAsset::loadObj(const std::string & filename)
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-	glBufferData(GL_ARRAY_BUFFER, 8 * vertices.size() * sizeof(float), 0, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(0), 3 * vertices.size() * sizeof(float), &final_positions[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(3 * vertices.size() * sizeof(float)), 3 * vertices.size() * sizeof(float), &final_normals[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(6 * vertices.size() * sizeof(float)), 2 * vertices.size() * sizeof(float), &final_textures[0]);
+	glBufferData(GL_ARRAY_BUFFER, 8 * m_vertices.size() * sizeof(float), 0, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(0), 3 * m_vertices.size() * sizeof(float), &final_positions[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(3 * m_vertices.size() * sizeof(float)), 3 * m_vertices.size() * sizeof(float), &final_normals[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(6 * m_vertices.size() * sizeof(float)), 2 * m_vertices.size() * sizeof(float), &final_textures[0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  if (!sample) m_vertices.clear();
 }
 
 void MeshAsset::initVAO()
@@ -159,6 +163,18 @@ void MeshAsset::destroy()
 	glDeleteVertexArrays(1, &m_vao);
 }
 
+const Vertex& MeshAsset::getMeshVertex(int id, int v) const {
+  if ( 3 * id + v >= m_vertices.size()) {
+    fprintf(stderr, "[Error] MeshAsset::getMesh() input index %d*3+%d larger then max index %d\n", id, v, m_vertices.size());
+    return Vertex();
+  }
+  return m_vertices[3 * id + v];
+}
+
+int MeshAsset::getMeshSize() const {
+  return m_vertices.size() / 3;
+}
+
 //////////////////////////////////////////////////////////
 
 MeshInstance::MeshInstance(MeshAsset * asset, const glm::vec3 & pos, const glm::vec3 & angles, float scale)
@@ -184,6 +200,16 @@ void MeshInstance::draw(const Program & prog, const glm::mat4 & view)
 	glDrawArrays(GL_TRIANGLES, 0, m_asset->m_numberOfVertices);
 
 	glBindVertexArray(0);
+}
+
+glm::vec3 MeshInstance::getMeshVertex(int id, int v) const{
+  const Vertex& vertex = m_asset->getMeshVertex(id, v);
+  glm::vec3 pos(vertex.x, vertex.y, vertex.z);
+  return pos * m_scale + m_position[v];
+}
+
+int MeshInstance::getMeshSize() const{
+  return m_asset->getMeshSize();
 }
 
 void MeshInstance::setPosition(const glm::vec3 & position)

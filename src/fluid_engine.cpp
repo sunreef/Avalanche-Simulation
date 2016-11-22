@@ -1,8 +1,10 @@
 #include "fluid_engine.h"
+#include <string>
+#include <random>
 
 
 
-FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleAsset(std::string("../data/meshes/sphere.obj"))
+FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleAsset(std::string("../data/meshes/sphere.obj"), false), m_surfaceAsset(std::string("../data/meshes/plane.obj"), true)
 {
 	std::ifstream init_file(initial_configuration);
 
@@ -11,7 +13,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	m_gridResolution = 2 * m_kernelSmoothingLength;
 	m_kernel = ExponentialKernel(m_kernelSmoothingLength);
 	m_restDensity = 1000.0f;
-	m_stiffness = 100.0f;
+	m_stiffness = 1000.0f;
 	m_viscosity = 0.01f;
 
 	int n;
@@ -41,6 +43,31 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	minY -= EPSILON;
 	minZ -= EPSILON;
 	m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+
+  /**
+    * sample the mesh surface with particles
+    */ 
+  m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0,0,0), glm::vec3(0, 0, 0), .25f);
+  n = 1000;
+  m_surface_particles.reserve(n);
+
+  // get radom generator;
+  std::default_random_engine generator;
+  std::uniform_real_distribution<float> sampler(0.0,1.0);
+
+  for (int p = 0; p < n; p++) {
+    float x, y, z;
+
+    int id = (int) (m_surface->getMeshSize() * (sampler(generator)));
+    float su1 = sqrtf(sampler(generator));
+    float u = 1.f - su1, v = su1 * sampler(generator);
+    
+    glm::vec3 pos = u * m_surface->getMeshVertex(id, 0) +
+                    v * m_surface->getMeshVertex(id, 1) +
+                    (1.f - u - v) * m_surface->getMeshVertex(id, 2);
+    
+    m_surface_particles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, pos));
+  }
 }
 
 
@@ -66,6 +93,16 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 	for (Particle* part : m_particles) {
 		part->instance.draw(prog, view);
 	}
+
+  for (Particle* part : m_surface_particles) {
+    part->instance.setColor(glm::vec3(1.0, 0, 0));
+    part->instance.draw(prog, view);
+  }
+
+//  MeshAsset tmp(std::string("../data/meshes/plane.obj"), false);
+//  MeshInstance test(&tmp, glm::vec3(0,0,0), glm::vec3(0,0,0), .25f);
+//  test.setColor(glm::vec3(0, 1.0, 1.0));
+//  test.draw(prog, view);
 }
 
 glm::vec3 FluidEngine::kernelGradient(const glm::vec3 & xi, const glm::vec3& xj) const

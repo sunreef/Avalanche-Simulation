@@ -26,10 +26,12 @@ class MeshAsset
 
 
 public:
-	MeshAsset(const std::string& filename);
+	MeshAsset(const std::string& filename, bool sample);
 	~MeshAsset();
 
 	void destroy();
+  const Vertex& getMeshVertex(int id, int v) const;
+  int getMeshSize() const;
 
 private:
 	static size_t count_meshes;
@@ -39,7 +41,7 @@ private:
 
 	int m_numberOfVertices;
 
-	void loadObj(const std::string &filename);
+	void loadObj(const std::string &filename, bool sample);
 	void initVAO();
 
 	glm::vec3 m_position;
@@ -47,6 +49,8 @@ private:
 	float m_scale;
 
 	glm::mat4 m_modelMatrix;
+
+  std::vector<Vertex> m_vertices;
 };
 
 class MeshInstance {
@@ -58,6 +62,9 @@ public:
 	void setAngles(const glm::vec3& angles);
 	void setScale(float scale);
 	void setColor(const glm::vec3& color);
+
+  glm::vec3 getMeshVertex(int id, int v) const;
+  int getMeshSize() const;
 
 private:
 	MeshAsset* m_asset;

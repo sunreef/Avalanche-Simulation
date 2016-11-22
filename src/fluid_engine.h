@@ -23,7 +23,11 @@ public:
 
 private:
 	MeshAsset m_particleAsset;
+  MeshAsset m_surfaceAsset;
+  MeshInstance* m_surface;
+
 	std::vector<Particle*> m_particles;
+  std::vector<Particle*> m_surface_particles;
 	Grid m_grid;
 
 	ExponentialKernel m_kernel;
