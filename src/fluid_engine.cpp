@@ -23,7 +23,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	float minY = std::numeric_limits<float>::max();
 	float minZ = std::numeric_limits<float>::max();
 
-	for (int p = 0; p < 0.2 * n; p++) {
+	for (int p = 0; p < 0.1 * n; p++) {
 		float x, y, z;
 		//init_file >> x >> y >> z;
 
@@ -193,24 +193,27 @@ void FluidEngine::updateDensity()
 		p->pressure = m_stiffness * (p->density / m_restDensity - 1.0);
 	}
 
-	//#pragma omp parallel for
-	//	for (int i = 0; i < m_meshParticles.size(); i++) {
-	//		Particle* p = m_meshParticles[i];
-	//		float density = 0.0f;
-	//		for (Particle* neighbour : p->neighbours) {
-	//			float norm = glm::distance(p->position, neighbour->position);
-	//			density += neighbour->mass * m_kernel.evaluate(norm * invKernelSmoothingLength);
-	//		}
-	//
-	//		p->density = density;
-	//		//p->pressure = m_stiffness * (std::pow(p->density / m_restDensity, 7) - 1.0f);
-	//		p->pressure = m_stiffness * (p->density / m_restDensity - 1.0);
-	//	}
+#pragma omp parallel for
+	for (int i = 0; i < m_meshParticles.size(); i++) {
+		Particle* p = m_meshParticles[i];
+		float density = m_restDensity;
+		for (Particle* neighbour : p->neighbours) {
+			if (!neighbour->isMeshParticle) {
+				float norm = glm::distance(p->position, neighbour->position);
+				density += neighbour->mass * m_kernel.evaluate(norm * invKernelSmoothingLength);
+			}
+
+		}
+
+		p->density = density;
+		//p->pressure = m_stiffness * (std::pow(p->density / m_restDensity, 7) - 1.0f);
+		p->pressure = m_stiffness * (p->density / m_restDensity - 1.0);
+	}
 }
 
 void FluidEngine::computeForce()
 {
-#pragma omp parallel for
+	//#pragma omp parallel for
 	for (int i = 0; i < m_fluidParticles.size(); i++) {
 		Particle* p = m_fluidParticles[i];
 		glm::vec3 pressureForce(0, 0, 0);
@@ -231,13 +234,18 @@ void FluidEngine::computeForce()
 				glm::vec3 kernelGrad = kernelGradient(p->position, neighbour->position);
 
 				if (neighbour->isMeshParticle) {
-					pressureForce += neighbour->mass * factor * kernelGrad;
+					pressureForce += m_restDensity * neighbour->volume *  (factor + neighbour->pressure / (neighbour->density * neighbour->density)) * kernelGrad;
+					//float nnn = glm::length(m_restDensity * neighbour->volume * factor * kernelGrad);
+					//if (nnn > 0)
+					//std::cout <<nnn << std::endl;
 				}
 				else {
+					/*			float aaa = glm::length(neighbour->mass * (factor + neighbour->pressure / (neighbour->density * neighbour->density)) * kernelGrad);
+								std::cout << aaa << std::endl;*/
 					pressureForce += neighbour->mass * (factor + neighbour->pressure / (neighbour->density * neighbour->density)) * kernelGrad;
-
+					viscosityForce += (neighbour->mass * glm::dot(dir, kernelGrad) / (neighbour->density * glm::dot(dir, dir))) * (p->velocity - neighbour->velocity);
 				}
-				viscosityForce += (neighbour->mass * glm::dot(dir, kernelGrad) / (neighbour->density * glm::dot(dir, dir))) * (p->velocity - neighbour->velocity);
+
 			}
 		}
 
@@ -252,7 +260,7 @@ void FluidEngine::computeForce()
 void FluidEngine::updatePositionAndSpeed()
 {
 	float newTimeStep = 0.01f;
-	float reboundRatio = 0.6f;
+	float reboundRatio = 0.8f;
 
 #pragma omp parallel for
 	for (int i = 0; i < m_fluidParticles.size(); i++) {
@@ -290,7 +298,7 @@ void FluidEngine::updatePositionAndSpeed()
 		}
 		p->instance.setPosition(p->position);
 		if (p->isMeshParticle) {
-			p->instance.setColor(glm::vec3(0.8, 0.8, 0.0));
+			p->instance.setColor(glm::vec3(0.9, 0.9, 0.0));
 		}
 		else {
 			norm = std::min(norm, 7.0f);
@@ -318,7 +326,8 @@ void FluidEngine::computeMeshParticleMass()
 			}
 
 		}
-		std::cout << inv_volume << std::endl;
-		part->mass = m_restDensity / inv_volume;
+		//std::cout << inv_volume << std::endl;
+		part->volume = 1.0f / inv_volume;
+		part->mass = m_restDensity * part->volume;
 	}
 }

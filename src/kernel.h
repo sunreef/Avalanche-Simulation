@@ -40,12 +40,12 @@ public:
 			return 0.0f;
 		}
 
-		float result = 1.5f * INV_PI * m_invCubeSmoothingLength;
+		float result = 0.25f * INV_PI * m_invCubeSmoothingLength;
 		if (q < 1) {
-			result *= 2.0f / 3.0f + q*q *(0.5f * q - 1.0f);
+			result *= 4.0f + q*q *(3.0f * q - 6.0f);
 		}
 		else {
-			result *= std::pow(2.0f - q, 3) / 6.0f;
+			result *= std::pow(2.0f - q, 3);
 		}
 		return result;
 	}
@@ -59,12 +59,12 @@ public:
 			return 0.0f;
 		}
 
-		float result = 1.5f * INV_PI * m_invCubeSmoothingLength;
+		float result = 0.25f * INV_PI * m_invCubeSmoothingLength;
 		if (q < 1) {
-			result *= q*(1.5f * q - 2.0f);
+			result *= q*(9.0f * q - 12.0f);
 		}
 		else {
-			result *= - std::pow(2.0f - q, 3) / 2.0f;
+			result *= - 3.0f * std::pow(2.0f - q, 3);
 		}
 		return result;
 	}
