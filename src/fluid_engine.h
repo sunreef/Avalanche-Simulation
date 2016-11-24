@@ -24,6 +24,9 @@ public:
 
 private:
 	MeshAsset m_particleAsset;
+  MeshAsset m_surfaceAsset;
+  MeshInstance* m_surface;
+
 	std::vector<Particle*> m_fluidParticles;
 	std::vector<Particle*> m_meshParticles;
 

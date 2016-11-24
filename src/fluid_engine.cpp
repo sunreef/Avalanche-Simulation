@@ -1,8 +1,10 @@
 #include "fluid_engine.h"
+#include <string>
+#include <random>
 
 
 
-FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleAsset(std::string("../data/meshes/sphere.obj"))
+FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleAsset(std::string("../data/meshes/sphere.obj"), false), m_surfaceAsset(std::string("../data/meshes/plane.obj"), true)
 {
 	std::ifstream init_file(initial_configuration);
 
@@ -37,56 +39,48 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 		m_fluidParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, false, glm::vec3(x, y, z)));
 	}
 
-	float samplingScale = m_kernelSmoothingLength / 2;
-	for (int x = 0; x < 1.0 / samplingScale; x++) {
-		for (int y = 0; y < 0.8 / samplingScale; y++) {
-			float x_pos = x * samplingScale;
-			float y_pos = y * samplingScale;
-			m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, glm::vec3(x_pos, y_pos, 0)));
-			m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, glm::vec3(x_pos, y_pos, -samplingScale)));
-		}
-	}
-
-	//for (int i = 0; i < 20; i++) {
-	//	for (int j = 0; j < 20; j++) {
-	//		for (int k = 0; k < 20; k++) {
-	//			float x, y, z;
-	//			//init_file >> x >> y >> z;
-
-	//			x = i * m_kernelSmoothingLength / 1.55;
-	//			y = j * m_kernelSmoothingLength / 1.55;
-	//			z = k * m_kernelSmoothingLength / 1.55;
-
-	//			minX = std::min(x, minX);
-	//			minY = std::min(y, minY);
-	//			minZ = std::min(z, minZ);
-	//			m_fluidParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, glm::vec3(x, y, z)));
-	//		}
-	//	}
-	//}
-
-	//for (int i = 0; i < 500; i++) {
-	//	float x, y, z;
-	//	//init_file >> x >> y >> z;
-
-	//	x = 0.25 + (float)(rand() % 100) / 1000;
-	//	y = 0.25 + (float)(rand() % 100) / 1000;
-	//	z = 1.0 + (float)(rand() % 100) / 1000;
-
-	//	minX = std::min(x, minX);
-	//	minY = std::min(y, minY);
-	//	minZ = std::min(z, minZ);
-	//	m_fluidParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, glm::vec3(x, y, z)));
-	//}
-
-
-
-
+//	float samplingScale = m_kernelSmoothingLength / 2;
+//	for (int x = 0; x < 1.0 / samplingScale; x++) {
+//		for (int y = 0; y < 0.8 / samplingScale; y++) {
+//			float x_pos = x * samplingScale;
+//			float y_pos = y * samplingScale;
+//			m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, glm::vec3(x_pos, y_pos, 0)));
+//			m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, glm::vec3(x_pos, y_pos, -samplingScale)));
+//		}
+//	}
 
 	minX -= EPSILON;
 	minY -= EPSILON;
 	minZ -= EPSILON;
 	m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+
+/**
+  * sample the mesh surface with particles
+  */ 
+
+  m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0,0,0), glm::vec3(0, 0, 0), .25f);
+  //n = (int) (2.0/m_kernelSmoothingLength);
+  n = 1000;
+  m_meshParticles.reserve(n);
+
+  // get radom generator;
+  std::default_random_engine generator;
+  std::uniform_real_distribution<float> sampler(0.0,1.0);
+
+  for (int p = 0; p < n; p++) {
+    float x, y, z;
+
+    int id = (int) (m_surface->getMeshSize() * (sampler(generator)));
+    float su1 = sqrtf(sampler(generator));
+    float u = 1.f - su1, v = su1 * sampler(generator);
+    
+    glm::vec3 pos = u * m_surface->getMeshVertex(id, 0) +
+                    v * m_surface->getMeshVertex(id, 1) +
+                    (1.f - u - v) * m_surface->getMeshVertex(id, 2);
+    
+    m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, pos));
+  }
+
 	initializeEngine();
 }
 
@@ -117,6 +111,11 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 		part->instance.setColor(glm::vec3(0.8, 0.8, 0));
 		part->instance.draw(prog, view);
 	}
+
+//  MeshAsset tmp(std::string("../data/meshes/plane.obj"), false);
+//  MeshInstance test(&tmp, glm::vec3(0,0,0), glm::vec3(0,0,0), .25f);
+//  test.setColor(glm::vec3(0, 1.0, 1.0));
+//  test.draw(prog, view);
 }
 
 float FluidEngine::getTotalSimulationTime()

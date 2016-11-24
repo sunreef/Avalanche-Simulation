@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
 
 	Program prog("../src/shaders/basic_shading.vert", "../src/shaders/basic_shading.frag");
 
-	MeshAsset mesh_asset("../data/meshes/plane.obj");
+	MeshAsset mesh_asset("../data/meshes/plane.obj", true);
 	MeshInstance mesh_instance(&mesh_asset);
 
 	glm::mat4 view;
