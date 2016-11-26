@@ -15,6 +15,8 @@ public:
 	float getTime();
 
 private:
-	FluidEngine m_fluid;
+	IISPH m_fluid;
+
+	float insertionTime = 0.0f;
 };
 

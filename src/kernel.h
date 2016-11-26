@@ -64,7 +64,7 @@ public:
 			result *= q*(9.0f * q - 12.0f);
 		}
 		else {
-			result *= - 3.0f * std::pow(2.0f - q, 3);
+			result *= - 3.0f * std::pow(2.0f - q, 2);
 		}
 		return result;
 	}
