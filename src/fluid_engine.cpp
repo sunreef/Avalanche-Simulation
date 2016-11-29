@@ -60,28 +60,28 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	  * sample the mesh surface with particles
 	  */
 
-	  //m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), .25f);
-	  ////n = (int) (2.0/m_kernelSmoothingLength);
-	  //n = 1000;
-	  //m_meshParticles.reserve(n);
+	  m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), .25f);
+	  //n = (int) (2.0/m_kernelSmoothingLength);
+	  n = 1000;
+	  m_meshParticles.reserve(n);
 
-	  //// get radom generator;
-	  //std::default_random_engine generator;
-	  //std::uniform_real_distribution<float> sampler(0.0, 1.0);
+	  // get radom generator;
+	  std::default_random_engine generator;
+	  std::uniform_real_distribution<float> sampler(0.0, 1.0);
 
-	  //for (int p = 0; p < n; p++) {
-	  //	float x, y, z;
+	  for (int p = 0; p < n; p++) {
+	  	float x, y, z;
 
-	  //	int id = (int)(m_surface->getMeshSize() * (sampler(generator)));
-	  //	float su1 = sqrtf(sampler(generator));
-	  //	float u = 1.f - su1, v = su1 * sampler(generator);
+	  	int id = (int)(m_surface->getMeshSize() * (sampler(generator)));
+	  	float su1 = sqrtf(sampler(generator));
+	  	float u = 1.f - su1, v = su1 * sampler(generator);
 
-	  //	glm::vec3 pos = u * m_surface->getMeshVertex(id, 0) +
-	  //		v * m_surface->getMeshVertex(id, 1) +
-	  //		(1.f - u - v) * m_surface->getMeshVertex(id, 2);
+	  	glm::vec3 pos = u * m_surface->getMeshVertex(id, 0) +
+	  		v * m_surface->getMeshVertex(id, 1) +
+	  		(1.f - u - v) * m_surface->getMeshVertex(id, 2);
 
-	  //	m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, pos));
-	  //}
+	  	m_meshParticles.push_back(new Particle(&m_particleAsset, n, m_kernelSmoothingLength, m_restDensity, true, pos, glm::vec3(0,0,0)));
+	  }
 
 	initializeEngine();
 }
@@ -135,10 +135,10 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 		part->instance.draw(prog, view);
 	}
 
-	//  MeshAsset tmp(std::string("../data/meshes/plane.obj"), false);
-	//  MeshInstance test(&tmp, glm::vec3(0,0,0), glm::vec3(0,0,0), .25f);
-	//  test.setColor(glm::vec3(0, 1.0, 1.0));
-	//  test.draw(prog, view);
+//	MeshAsset tmp(std::string("../data/meshes/plane.obj"), false);
+//	MeshInstance test(&tmp, glm::vec3(0,0,20), glm::vec3(0,0,0), .25f);
+//	test.setColor(glm::vec3(0, 1.0, 1.0));
+//	test.draw(prog, view);
 }
 
 float FluidEngine::getTotalSimulationTime()
