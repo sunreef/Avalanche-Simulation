@@ -25,7 +25,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	float minY = std::numeric_limits<float>::max();
 	float minZ = std::numeric_limits<float>::max();
 
-	for (int p = 0; p < 0.2 * n; p++) {
+	for (int p = 0; p < 0.05 * n; p++) {
 		float x, y, z;
 		//init_file >> x >> y >> z;
 
@@ -60,7 +60,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 
   m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0,0,0), glm::vec3(0, 0, 0), .25f);
   //n = (int) (2.0/m_kernelSmoothingLength);
-  n = 1000;
+  n = 3000;
   m_meshParticles.reserve(n);
 
   // get radom generator;
@@ -78,7 +78,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
                     v * m_surface->getMeshVertex(id, 1) +
                     (1.f - u - v) * m_surface->getMeshVertex(id, 2);
     
-    m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity, true, pos));
+    m_meshParticles.push_back(new Particle(&m_particleAsset, m_kernelSmoothingLength, m_restDensity*100, true, pos));
   }
 
 	initializeEngine();
@@ -318,6 +318,6 @@ void FluidEngine::computeMeshParticleMass()
 
 		}
 		std::cout << inv_volume << std::endl;
-		part->mass = m_restDensity / inv_volume;
+		part->mass = m_restDensity / inv_volume * 1000;
 	}
 }
