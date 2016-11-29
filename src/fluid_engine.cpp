@@ -95,7 +95,7 @@ FluidEngine::~FluidEngine()
 	}
 }
 
-void FluidEngine::addParticle(glm::vec3 & position, glm::vec3 & velocity)
+void FluidEngine::addParticle(glm::vec3 & position, const glm::vec3 & velocity)
 {
 	int n = m_fluidParticles.size();
 	m_fluidParticles.push_back(new Particle(&m_particleAsset, n, m_kernelSmoothingLength, m_restDensity, false, position, velocity));

@@ -18,7 +18,7 @@ public:
 	FluidEngine(const std::string& initial_configuration);
 	~FluidEngine();
 
-	void addParticle(glm::vec3& position, glm::vec3& velocity);
+	void addParticle(glm::vec3& position, const glm::vec3& velocity);
 
 	void basicSphNextStep();
 	void pcisphNextStep();
