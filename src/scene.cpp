@@ -26,8 +26,8 @@ void Scene::update()
 
 
 
-	m_fluid.basicSphNextStep();
-	//m_fluid.pcisphNextStep();
+  m_fluid.basicSphNextStep();
+//	m_fluid.pcisphNextStep();
 	//m_fluid.nextStep();
 }
 
