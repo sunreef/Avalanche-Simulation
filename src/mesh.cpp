@@ -54,6 +54,7 @@ void MeshAsset::loadObj(const std::string & filename, bool sample)
 			textures.push_back(y);
 		}
 		if (word.compare("f") == 0) {
+			Face f;
 
 			std::string vertex;
 			for (int v = 0; v < 3; v++) {
@@ -81,6 +82,8 @@ void MeshAsset::loadObj(const std::string & filename, bool sample)
 				point.y = positions[3 * i + 1];
 				point.z = positions[3 * i + 2];
 
+				f.vertices.push_back(glm::vec3(point.x, point.y, point.z));
+
 				point.n_x = normals[3 * j];
 				point.n_y = normals[3 * j + 1];
 				point.n_z = normals[3 * j + 2];
@@ -90,6 +93,7 @@ void MeshAsset::loadObj(const std::string & filename, bool sample)
 
 				m_vertices.push_back(point);
 			}
+			m_faces.push_back(f);
 		}
 	}
 
@@ -175,6 +179,11 @@ int MeshAsset::getMeshSize() const {
   return m_vertices.size() / 3;
 }
 
+std::vector<Face>& MeshAsset::getFaces()
+{
+	return m_faces;
+}
+
 //////////////////////////////////////////////////////////
 
 MeshInstance::MeshInstance(MeshAsset * asset, const glm::vec3 & pos, const glm::vec3 & angles, float scale)
@@ -183,7 +192,7 @@ MeshInstance::MeshInstance(MeshAsset * asset, const glm::vec3 & pos, const glm::
 	m_position = pos;
 	m_angles = angles;
 	m_scale = scale;
-	m_color = glm::vec3((float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000);
+	m_color = glm::vec4((float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, 1.0f);
 }
 
 void MeshInstance::draw(const Program & prog, const glm::mat4 & view)
@@ -212,6 +221,22 @@ int MeshInstance::getMeshSize() const{
   return m_asset->getMeshSize();
 }
 
+std::vector<Face> MeshInstance::getFaces()
+{
+	updateModelMatrix();
+	std::vector<Face> result;
+	for (Face f : m_asset->getFaces()) {
+		Face f2;
+		for (int i = 0; i < 3; i++) {
+			f2.vertices.push_back(glm::vec3(m_modelMatrix * glm::vec4(f.vertices[i], 1.0)));
+		}
+		result.push_back(f2);
+	}
+
+
+	return result;
+}
+
 void MeshInstance::setPosition(const glm::vec3 & position)
 {
 	m_position = position;
@@ -227,7 +252,7 @@ void MeshInstance::setScale(float scale)
 	m_scale = scale;
 }
 
-void MeshInstance::setColor(const glm::vec3 & color)
+void MeshInstance::setColor(const glm::vec4 & color)
 {
 	m_color = color;
 }

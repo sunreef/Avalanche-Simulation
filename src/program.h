@@ -20,7 +20,7 @@ public:
 
 	void loadModelViewMatrix(const glm::mat4 &modelView) const;
 	void loadProjMatrix(const glm::mat4 &proj) const;
-	void loadColorUniform(const glm::vec3 &color) const;
+	void loadColorUniform(const glm::vec4 &color) const;
 
 	void destroy();
 

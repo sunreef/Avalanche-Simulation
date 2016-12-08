@@ -18,17 +18,17 @@ public:
 	FluidEngine(const std::string& initial_configuration);
 	~FluidEngine();
 
-	void addParticle(glm::vec3& position, glm::vec3& velocity);
+	void addParticle(glm::vec3& position, glm::vec3& velocity, bool meshParticle);
+	void addBoundaryParticles(const std::vector<glm::vec3>& positions);
 
 	void basicSphNextStep();
 	void pcisphNextStep();
 	void draw(const Program &prog, const glm::mat4& view);
 	float getTotalSimulationTime();
+	float getSimulationScale();
 
 protected:
 	MeshAsset m_particleAsset;
-	MeshAsset m_surfaceAsset;
-	MeshInstance* m_surface;
 
 	std::vector<Particle*> m_fluidParticles;
 	std::vector<Particle*> m_meshParticles;
@@ -42,14 +42,14 @@ protected:
 	float m_gridResolution = 0.1f;
 	float m_restDensity = 1.0f;
 	float m_stiffness = 10000.0f;
-	float m_viscosity = 0.000001f;
+	float m_viscosity = 0.0001f;
+	float m_fluidBoundaryViscosity = 0.01f;
 	float m_timeStep = 0.001f;
 
 	glm::vec3 kernelGradient(const glm::vec3& xi, const glm::vec3& xj) const;
 
 	void initializeEngine();
 	void buildGrid();
-	void computeNeighbours();
 
 	void updateDensity();
 	void computeViscosityForce();

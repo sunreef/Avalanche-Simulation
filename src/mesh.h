@@ -20,6 +20,10 @@ struct Vertex {
 	float t_x, t_y;
 };
 
+struct Face {
+	std::vector<glm::vec3> vertices;
+};
+
 class MeshAsset
 {
 	friend class MeshInstance;
@@ -30,8 +34,10 @@ public:
 	~MeshAsset();
 
 	void destroy();
-  const Vertex& getMeshVertex(int id, int v) const;
-  int getMeshSize() const;
+	const Vertex& getMeshVertex(int id, int v) const;
+	int getMeshSize() const;
+
+	std::vector<Face>& getFaces();
 
 private:
 	static size_t count_meshes;
@@ -50,7 +56,8 @@ private:
 
 	glm::mat4 m_modelMatrix;
 
-  std::vector<Vertex> m_vertices;
+	std::vector<Vertex> m_vertices;
+	std::vector<Face> m_faces;
 };
 
 class MeshInstance {
@@ -61,10 +68,12 @@ public:
 	void setPosition(const glm::vec3& position);
 	void setAngles(const glm::vec3& angles);
 	void setScale(float scale);
-	void setColor(const glm::vec3& color);
+	void setColor(const glm::vec4& color);
 
-  glm::vec3 getMeshVertex(int id, int v) const;
-  int getMeshSize() const;
+	glm::vec3 getMeshVertex(int id, int v) const;
+	int getMeshSize() const;
+
+	std::vector<Face> getFaces();
 
 private:
 	MeshAsset* m_asset;
@@ -75,7 +84,7 @@ private:
 
 	glm::mat4 m_modelMatrix;
 
-	glm::vec3 m_color;
+	glm::vec4 m_color;
 
 	void updateModelMatrix();
 };
