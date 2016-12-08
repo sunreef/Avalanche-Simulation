@@ -214,7 +214,7 @@ void MeshInstance::draw(const Program & prog, const glm::mat4 & view)
 glm::vec3 MeshInstance::getMeshVertex(int id, int v) const{
   const Vertex& vertex = m_asset->getMeshVertex(id, v);
   glm::vec3 pos(vertex.x, vertex.y, vertex.z);
-  return pos * m_scale + m_position[v];
+  return pos * m_scale + m_position;
 }
 
 int MeshInstance::getMeshSize() const{
