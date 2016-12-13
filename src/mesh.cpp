@@ -242,6 +242,10 @@ void MeshInstance::setPosition(const glm::vec3 & position)
 	m_position = position;
 }
 
+void MeshInstance::printPosition() {
+  printf("%.3f %.3f %.3f\n", m_position[0], m_position[1], m_position[2]);
+}
+
 void MeshInstance::setAngles(const glm::vec3 & angles)
 {
 	m_angles = angles;

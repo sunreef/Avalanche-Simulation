@@ -34,5 +34,6 @@ struct Particle
 	glm::vec3 temp_velocity;
 
 	bool isMeshParticle;
+  bool isOverlapped;
 };
 

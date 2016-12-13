@@ -9,6 +9,7 @@ m_sizeY(1),
 m_sizeZ(1)
 {
 	m_cells = std::vector<std::vector<std::vector<Cell> > >(1, std::vector<std::vector<Cell> >(1, std::vector<Cell>(1)));
+  m_searchRadius = 1;
 }
 
 Grid::~Grid()
@@ -60,6 +61,27 @@ bool Grid::insertParticles(const std::vector<Particle*>::iterator & begin, const
 	return true;
 }
 
+std::vector<glm::vec3> Grid::getFluidSnowBoundary(int density) {
+  std::vector<glm::vec3> ret;
+
+  for (int x = 0; x < m_sizeX; x++) {
+    for (int y = 0; y < m_sizeY; y++) {
+      for (int z = 0; z < m_sizeZ; z++) {
+        if (m_cells[x][y][z].fluidParticles.size() == 0) {
+          continue;
+        } else if (m_cells[x][y][z].fluidParticles.size() < density) {
+          float posx = x * m_scale + m_corner.x;
+          float posy = y * m_scale + m_corner.y;
+          float posz = (z+1) * m_scale + m_corner.z;
+          ret.push_back(glm::vec3(posx, posy, posz));       
+        }
+      }
+    }
+  }  
+
+  return ret;
+}
+
 void Grid::computeNeighboursBoundary()
 {
 #ifdef _OPENMP
@@ -72,15 +94,14 @@ void Grid::computeNeighboursBoundary()
 					continue;
 				}
 				std::set<Particle*> neighbours;
-				int searchRadius = 1;
 
 				neighbours.clear();
-				int xMin = std::max(0, x - searchRadius);
-				int xMax = std::min(m_sizeX, x + searchRadius + 1);
-				int yMin = std::max(0, y - searchRadius);
-				int yMax = std::min(m_sizeY, y + searchRadius + 1);
-				int zMin = std::max(0, z - searchRadius);
-				int zMax = std::min(m_sizeZ, z + searchRadius + 1);
+				int xMin = std::max(0, x - m_searchRadius);
+				int xMax = std::min(m_sizeX, x + m_searchRadius + 1);
+				int yMin = std::max(0, y - m_searchRadius);
+				int yMax = std::min(m_sizeY, y + m_searchRadius + 1);
+				int zMin = std::max(0, z - m_searchRadius);
+				int zMax = std::min(m_sizeZ, z + m_searchRadius + 1);
 
 				for (int x2 = xMin; x2 < xMax; x2++) {
 					for (int y2 = yMin; y2 < yMax; y2++) {
@@ -98,6 +119,38 @@ void Grid::computeNeighboursBoundary()
 	}
 }
 
+void Grid::computeFluidSmokeBoundary() {
+  for (int x = 0; x < m_sizeX; x++)
+    for (int y = 0; y < m_sizeY; y++)
+      for (int z = 0; z < m_sizeZ; z++) {
+
+        if (m_cells[x][y][z].fluidParticles.size() == 0 and m_cells[x][y][z].boundaryParticles.size() == 0)
+          m_cells[x][y][z].type = 1;
+
+        bool flag = false;
+        for (Particle* p : m_cells[x][y][z].fluidParticles) {
+          if (not p->isOverlapped) {flag = true; break;}
+        }
+
+        m_cells[x][y][z].type = flag? -1 : 1;
+      }
+
+  for (int x = 1; x < m_sizeX - 1; x++)
+    for (int y = 1; y < m_sizeY - 1; y++)
+      for (int z = 1; z < m_sizeZ - 1; z++) {
+
+        bool flag = false;
+
+        for (int dx = -1; dx <= 1 and !flag; dx++)
+          for (int dy = -1; dy <= 1 and !flag; dy++)
+            for (int dz = -1; dz <= 1 and !flag; dz++) 
+              flag = m_cells[x][y][z].type == 1;     
+        
+        if (flag and m_cells[x][y][z].type == -1)
+          m_cells[x][y][z].type = 0;
+      }
+}
+
 void Grid::computeNeighboursFluid()
 {
 #ifdef _OPENMP
@@ -110,15 +163,14 @@ void Grid::computeNeighboursFluid()
 					continue;
 				}
 				std::set<Particle*> neighbours;
-				int searchRadius = 1;
 
 				neighbours.clear();
-				int xMin = std::max(0, x - searchRadius);
-				int xMax = std::min(m_sizeX, x + searchRadius + 1);
-				int yMin = std::max(0, y - searchRadius);
-				int yMax = std::min(m_sizeY, y + searchRadius + 1);
-				int zMin = std::max(0, z - searchRadius);
-				int zMax = std::min(m_sizeZ, z + searchRadius + 1);
+				int xMin = std::max(0, x - m_searchRadius);
+				int xMax = std::min(m_sizeX, x + m_searchRadius + 1);
+				int yMin = std::max(0, y - m_searchRadius);
+				int yMax = std::min(m_sizeY, y + m_searchRadius + 1);
+				int zMin = std::max(0, z - m_searchRadius);
+				int zMax = std::min(m_sizeZ, z + m_searchRadius + 1);
 
 				for (int x2 = xMin; x2 < xMax; x2++) {
 					for (int y2 = yMin; y2 < yMax; y2++) {

@@ -10,8 +10,8 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	std::ifstream init_file(initial_configuration);
 
 
-	m_kernelSmoothingLength = 0.02f;
-	m_gridResolution = 2 * m_kernelSmoothingLength;
+	m_kernelSmoothingLength = 0.05f;
+	m_gridResolution = m_kernelSmoothingLength;
 	m_kernel = CubicKernel(m_kernelSmoothingLength);
 	m_restDensity = 1000.0f;
 	m_stiffness = 10000.0f;
@@ -86,6 +86,7 @@ void FluidEngine::basicSphNextStep()
 	buildGrid();
 	m_grid.computeNeighboursFluid();
 	updateDensity();
+  m_grid.computeFluidSmokeBoundary();
 	basicSphPressureForce();
 	computeViscosityForce();
 	computeExternalForce();
@@ -109,11 +110,22 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 {
 	for (Particle* part : m_fluidParticles) {
 		part->instance.draw(prog, view);
+//    printf("fluid ");
+//    part->instance.printPosition();
 	}
 	for (Particle* part : m_meshParticles) {
 		part->instance.setColor(glm::vec4(0.8, 0.8, 0, 0.5f));
 		part->instance.draw(prog, view);
 	}
+//  std::vector<glm::vec3> smoke = m_grid.getFluidSnowBoundary(4);
+//  printf("somke size %d\n", smoke.size());
+//  for (glm::vec3 pos : smoke) {
+//    Particle p(&m_particleAsset, m_fluidParticles.size(), m_kernelSmoothingLength, m_restDensity, false, pos);
+//    p.instance.setColor(glm::vec4(1.0, 1.0, 1.0, 0.5f));
+//    p.instance.draw(prog, view);
+//    printf("smoke ");
+//    p.instance.printPosition();
+//  }
 }
 
 float FluidEngine::getTotalSimulationTime()
@@ -179,18 +191,24 @@ void FluidEngine::buildGrid()
 void FluidEngine::updateDensity()
 {
 	float invKernelSmoothingLength = 1.0f / m_kernelSmoothingLength;
+  float searchRadius = m_grid.getSearchRadius();
 
 #pragma omp parallel for
 	for (int i = 0; i < m_fluidParticles.size(); i++) {
 		Particle* p = m_fluidParticles[i];
 		float density = 0.0f;
+    float numDensity = 0.f;
+
 		for (Particle* neighbour : p->neighbours) {
 			float norm = glm::distance(p->position, neighbour->position);
 			density += neighbour->mass * m_kernel.evaluate(norm * invKernelSmoothingLength);
+      if (norm > 1e-6) numDensity += searchRadius / norm - 1.f;
 		}
 
+//    printf("%d : %.3f\n", i, numDensity);
 		p->density = density;
 		p->pressure =  m_stiffness * (p->density - m_restDensity);
+    if (!p->isMeshParticle and numDensity < m_thresholdN0) p->isOverlapped = true;
 		if (p->pressure < 0.0f) {
 			p->pressure = 0.0f;
 		}
@@ -277,7 +295,7 @@ void FluidEngine::computeExternalForce()
 
 void FluidEngine::updatePositionAndSpeed()
 {
-	float newTimeStep = 0.001f;
+	float newTimeStep = 1.f;
 	float reboundRatio = 0.4f;
 
 	std::vector<glm::vec3> newVelocities(m_fluidParticles.size());
@@ -305,7 +323,10 @@ void FluidEngine::updatePositionAndSpeed()
 		}
 		else {
 			norm = std::min(norm, 7.0f);
-			p->instance.setColor(glm::vec4(norm / 7.0, norm / 7.0, 1.0f, 0.9f));
+      if (p->isOverlapped)
+        p->instance.setColor(glm::vec4(1.0, 1.0, 1.0f, 0.9f));
+      else
+        p->instance.setColor(glm::vec4(norm / 7.0, norm / 7.0, 1.0f, 0.9f));
 		}
 	}
 

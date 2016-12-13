@@ -70,6 +70,7 @@ public:
 	void setAngles(const glm::vec3& angles);
 	void setScale(float scale);
 	void setColor(const glm::vec4& color);
+  void printPosition();
 
 	glm::vec3 getMeshVertex(int id, int v) const;
 	int getMeshSize() const;

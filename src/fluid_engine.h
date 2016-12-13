@@ -46,7 +46,10 @@ protected:
 	float m_fluidBoundaryViscosity = 0.01f;
 	float m_timeStep = 0.001f;
 
+  float m_thresholdN0 = 250;
+
 	glm::vec3 kernelGradient(const glm::vec3& xi, const glm::vec3& xj) const;
+
 
 	void initializeEngine();
 	void buildGrid();

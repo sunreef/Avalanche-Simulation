@@ -106,9 +106,9 @@ int main(int argc, char** argv) {
 		std::cout << "Updated physics of the scene in " << (float)(clock() - time) / CLOCKS_PER_SEC << " seconds.\n";
 		time = clock();
 
-		if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
+//		if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
 			scene.draw(prog, view);
-		}
+//		}
 
 		std::cout << "Rendered scene in " << (float)(clock() - time) / CLOCKS_PER_SEC << " seconds.\n";
 
