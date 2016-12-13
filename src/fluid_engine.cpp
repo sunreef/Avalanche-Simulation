@@ -44,38 +44,8 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	minX -= EPSILON;
 	minY -= EPSILON;
 	minZ -= EPSILON;
-	m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+  m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
 
-<<<<<<< HEAD
-=======
-	/**
-	  * sample the mesh surface with particles
-	  */
-
-	  m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), .25f);
-	  //n = (int) (2.0/m_kernelSmoothingLength);
-	  n = 1000;
-	  m_meshParticles.reserve(n);
-
-	  // get radom generator;
-	  std::default_random_engine generator;
-	  std::uniform_real_distribution<float> sampler(0.0, 1.0);
-
-	  for (int p = 0; p < n; p++) {
-	  	float x, y, z;
-
-	  	int id = (int)(m_surface->getMeshSize() * (sampler(generator)));
-	  	float su1 = sqrtf(sampler(generator));
-	  	float u = 1.f - su1, v = su1 * sampler(generator);
-
-	  	glm::vec3 pos = u * m_surface->getMeshVertex(id, 0) +
-	  		v * m_surface->getMeshVertex(id, 1) +
-	  		(1.f - u - v) * m_surface->getMeshVertex(id, 2);
-
-	  	m_meshParticles.push_back(new Particle(&m_particleAsset, n, m_kernelSmoothingLength, m_restDensity, true, pos, glm::vec3(0,0,0)));
-	  }
-
->>>>>>> 595d44db03c70f76fdd065bebb06363ae6d34c43
 	initializeEngine();
 }
 
@@ -88,11 +58,7 @@ FluidEngine::~FluidEngine()
 	}
 }
 
-<<<<<<< HEAD
 void FluidEngine::addParticle(glm::vec3 & position, glm::vec3 & velocity, bool meshParticle)
-=======
-void FluidEngine::addParticle(glm::vec3 & position, const glm::vec3 & velocity)
->>>>>>> 595d44db03c70f76fdd065bebb06363ae6d34c43
 {
 	if (!meshParticle) {
 	int n = m_fluidParticles.size();
@@ -148,14 +114,6 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 		part->instance.setColor(glm::vec4(0.8, 0.8, 0, 0.5f));
 		part->instance.draw(prog, view);
 	}
-<<<<<<< HEAD
-=======
-
-//	MeshAsset tmp(std::string("../data/meshes/plane.obj"), false);
-//	MeshInstance test(&tmp, glm::vec3(0,0,20), glm::vec3(0,0,0), .25f);
-//	test.setColor(glm::vec3(0, 1.0, 1.0));
-//	test.draw(prog, view);
->>>>>>> 595d44db03c70f76fdd065bebb06363ae6d34c43
 }
 
 float FluidEngine::getTotalSimulationTime()

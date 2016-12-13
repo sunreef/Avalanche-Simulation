@@ -21,7 +21,7 @@ struct CompareVec3 {
 class MeshSampler
 {
 public:
-	MeshSampler(std::vector<Face>& faces);
+	MeshSampler(const std::vector<Face>& faces);
 	~MeshSampler();
 
 	std::set<glm::vec3, CompareVec3> sampleMeshUniformly(float samplingScale);

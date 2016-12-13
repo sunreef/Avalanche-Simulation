@@ -2,7 +2,7 @@
 
 
 
-MeshSampler::MeshSampler(std::vector<Face>& faces) : m_faces(faces)
+MeshSampler::MeshSampler(const std::vector<Face>& faces) : m_faces(faces)
 {
 }
 

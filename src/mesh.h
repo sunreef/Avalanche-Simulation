@@ -62,6 +62,7 @@ private:
 
 class MeshInstance {
 public:
+  MeshInstance(){}
 	MeshInstance(MeshAsset* asset, const glm::vec3 &pos = glm::vec3(0, 0, 0), const glm::vec3 &angles = glm::vec3(0, 0, 0), float scale = 1.0f);
 	void draw(const Program &prog, const glm::mat4 &view);
 
