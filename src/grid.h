@@ -8,7 +8,9 @@
 #include "particle.h"
 
 struct Cell {
-	std::vector<Particle*> particles;
+	std::vector<Particle*> fluidParticles;
+	std::vector<Particle*> boundaryParticles;
+
 };
 
 class Grid
@@ -18,7 +20,8 @@ public:
 	~Grid();
 
 	bool insertParticles(const std::vector<Particle*>::iterator & begin, const std::vector<Particle*>::iterator & end);
-	void computeNeighbours();
+	void computeNeighboursFluid();
+	void computeNeighboursBoundary();
 
 private:
 	glm::vec3 m_corner;

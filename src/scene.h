@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <random>
 
 #include "fluid_engine.h"
+#include "mesh_sampler.h"
 
 class Scene
 {
@@ -15,7 +17,10 @@ public:
 	float getTime();
 
 private:
-	IISPH m_fluid;
+	FluidEngine m_fluid;
+	MeshAsset m_meshAsset;
+	MeshInstance m_surface;
+	MeshSampler m_sampler;
 
 	float insertionTime = 0.0f;
 };

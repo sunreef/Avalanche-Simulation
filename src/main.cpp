@@ -101,8 +101,17 @@ int main(int argc, char** argv) {
 
 		prog.loadProjMatrix(proj);
 
+		clock_t time = clock();
 		scene.update();
-		scene.draw(prog, view);
+		std::cout << "Updated physics of the scene in " << (float)(clock() - time) / CLOCKS_PER_SEC << " seconds.\n";
+		time = clock();
+
+		if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
+			scene.draw(prog, view);
+		}
+
+		std::cout << "Rendered scene in " << (float)(clock() - time) / CLOCKS_PER_SEC << " seconds.\n";
+
 		//mesh_instance.draw(prog, view);
 
 		std::cout << "Total time: " << scene.getTime() << " seconds." << std::endl;
