@@ -60,9 +60,9 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	  * sample the mesh surface with particles
 	  */
 
-	  m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), .25f);
+	  m_surface = new MeshInstance(&m_surfaceAsset, glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), .25f);
 	  //n = (int) (2.0/m_kernelSmoothingLength);
-	  //n = 1000;
+	  n = 1000;
 	  m_meshParticles.reserve(n);
 
 	  // get radom generator;
