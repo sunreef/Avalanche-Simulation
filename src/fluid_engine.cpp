@@ -85,12 +85,22 @@ void FluidEngine::basicSphNextStep()
 {
 	buildGrid();
 	m_grid.computeNeighboursFluid();
+
 	updateDensity();
+
   m_grid.computeFluidSmokeBoundary();
+  m_grid.sphGridInteraction(m_timeStep);
+
 	basicSphPressureForce();
 	computeViscosityForce();
 	computeExternalForce();
 	updatePositionAndSpeed();
+
+  m_grid.computeSmokeForce();
+  m_grid.addSmokeForce(m_timeStep);
+  m_grid.solvePressure(m_timeStep);
+  m_grid.correctVelocity(m_timeStep);
+  m_grid.updateDensityAndSpeed(m_timeStep);
 }
 
 void FluidEngine::pcisphNextStep()
@@ -117,15 +127,17 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 		part->instance.setColor(glm::vec4(0.8, 0.8, 0, 0.5f));
 		part->instance.draw(prog, view);
 	}
-//  std::vector<glm::vec3> smoke = m_grid.getFluidSnowBoundary(4);
-//  printf("somke size %d\n", smoke.size());
-//  for (glm::vec3 pos : smoke) {
-//    Particle p(&m_particleAsset, m_fluidParticles.size(), m_kernelSmoothingLength, m_restDensity, false, pos);
-//    p.instance.setColor(glm::vec4(1.0, 1.0, 1.0, 0.5f));
-//    p.instance.draw(prog, view);
-//    printf("smoke ");
-//    p.instance.printPosition();
-//  }
+
+  std::vector<glm::vec4> smoke = m_grid.adhereSnowSmoke(m_timeStep);
+  float colorScale = 100000;
+  printf("smoke size %d\n", smoke.size());
+  for (glm::vec4 pos : smoke) {
+    Particle p(&m_particleAsset, 0, m_kernelSmoothingLength/3, m_restDensity, false, pos); 
+    p.instance.setColor(glm::vec4(1,1,1,1));
+//    p.instance.setColor(glm::vec4(pos.w*colorScale, pos.w*colorScale, pos.w*colorScale, 0.9));
+    p.instance.draw(prog, view);
+  }
+  smoke.clear();
 }
 
 float FluidEngine::getTotalSimulationTime()
@@ -160,28 +172,32 @@ void FluidEngine::initializeEngine()
 
 void FluidEngine::buildGrid()
 {
-	float minX = std::numeric_limits<float>::max();
-	float minY = std::numeric_limits<float>::max();
-	float minZ = std::numeric_limits<float>::max();
 
-	for (int p = 0; p < m_fluidParticles.size(); p++) {
-		glm::vec3 pos = m_fluidParticles[p]->position;
-		minX = std::min(pos.x, minX);
-		minY = std::min(pos.y, minY);
-		minZ = std::min(pos.z, minZ);
-	}
-	for (int p = 0; p < m_meshParticles.size(); p++) {
-		glm::vec3 pos = m_meshParticles[p]->position;
-		minX = std::min(pos.x, minX);
-		minY = std::min(pos.y, minY);
-		minZ = std::min(pos.z, minZ);
-	}
+  float minX = std::numeric_limits<float>::max();
+  float minY = std::numeric_limits<float>::max();
+  float minZ = std::numeric_limits<float>::max();
 
-	minX -= EPSILON;
-	minY -= EPSILON;
-	minZ -= EPSILON;
+  for (int p = 0; p < m_fluidParticles.size(); p++) {
+    glm::vec3 pos = m_fluidParticles[p]->position;
+    minX = std::min(pos.x, minX);
+    minY = std::min(pos.y, minY);
+    minZ = std::min(pos.z, minZ);
+  }
+  for (int p = 0; p < m_meshParticles.size(); p++) {
+    glm::vec3 pos = m_meshParticles[p]->position;
+    minX = std::min(pos.x, minX);
+    minY = std::min(pos.y, minY);
+    minZ = std::min(pos.z, minZ);
+  }
 
-	m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+  minX -= EPSILON;
+  minY -= EPSILON;
+  minZ -= EPSILON;
+  if (m_grid.smaller(glm::vec3(minX,minY,minZ)))
+    m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+  else
+    m_grid.clear();
+
 	m_grid.insertParticles(m_fluidParticles.begin(), m_fluidParticles.end());
 	m_grid.insertParticles(m_meshParticles.begin(), m_meshParticles.end());
 
@@ -323,10 +339,10 @@ void FluidEngine::updatePositionAndSpeed()
 		}
 		else {
 			norm = std::min(norm, 7.0f);
-      if (p->isOverlapped)
-        p->instance.setColor(glm::vec4(1.0, 1.0, 1.0f, 0.9f));
-      else
-        p->instance.setColor(glm::vec4(norm / 7.0, norm / 7.0, 1.0f, 0.9f));
+//      if (p->isOverlapped)
+//        p->instance.setColor(glm::vec4(1.0, 0, 1.0f, 0.9f));
+//      else
+      p->instance.setColor(glm::vec4(norm / 7.0, norm / 7.0, 1.0f, 0.9f));
 		}
 	}
 

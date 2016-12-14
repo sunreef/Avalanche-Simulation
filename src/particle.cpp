@@ -9,6 +9,7 @@ density(rest_density),
 mass(std::pow(0.5f * size, 3) * rest_density),
 isMeshParticle(meshParticle)
 {
+  surface = size * size * size * 0.5f * 3.14f;
 }
 
 Particle::~Particle()

@@ -18,6 +18,7 @@ struct Particle
 	std::set<Particle*> neighbours;
 
 	float size;
+  float surface;
 	float mass;
 	float volume;
 	glm::vec3 position;
