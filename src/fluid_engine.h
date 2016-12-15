@@ -7,6 +7,7 @@
 
 #include "particle.h"
 #include "grid.h"
+#include "sGrid.h"
 #include "kernel.h"
 
 #define EPSILON 0.000001f
@@ -34,12 +35,14 @@ protected:
 	std::vector<Particle*> m_meshParticles;
 
 	Grid m_grid;
+  sGrid m_sgrid;
 
 	CubicKernel m_kernel;
 
 	float m_totalTime = 0.0f;
 	float m_kernelSmoothingLength = 0.1f;
 	float m_gridResolution = 0.1f;
+	float m_sgridResolution = 0.1f;
 	float m_restDensity = 1.0f;
 	float m_stiffness = 10000.0f;
 	float m_viscosity = 0.0001f;

@@ -12,6 +12,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 
 	m_kernelSmoothingLength = 0.05f;
 	m_gridResolution = m_kernelSmoothingLength;
+  m_sgridResolution = m_kernelSmoothingLength;
 	m_kernel = CubicKernel(m_kernelSmoothingLength);
 	m_restDensity = 1000.0f;
 	m_stiffness = 10000.0f;
@@ -45,6 +46,7 @@ FluidEngine::FluidEngine(const std::string& initial_configuration) : m_particleA
 	minY -= EPSILON;
 	minZ -= EPSILON;
   m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+  m_sgrid = sGrid(glm::vec3(minX, minY, minZ), m_sgridResolution);
 
 	initializeEngine();
 }
@@ -88,19 +90,19 @@ void FluidEngine::basicSphNextStep()
 
 	updateDensity();
 
-  m_grid.computeFluidSmokeBoundary();
-  m_grid.sphGridInteraction(m_timeStep);
+  m_sgrid.computeFluidSmokeBoundary();
+  m_sgrid.sphGridInteraction(m_timeStep);
 
 	basicSphPressureForce();
 	computeViscosityForce();
 	computeExternalForce();
 	updatePositionAndSpeed();
 
-  m_grid.computeSmokeForce();
-  m_grid.addSmokeForce(m_timeStep);
-  m_grid.solvePressure(m_timeStep);
-  m_grid.correctVelocity(m_timeStep);
-  m_grid.updateDensityAndSpeed(m_timeStep);
+  m_sgrid.computeSmokeForce();
+  m_sgrid.addSmokeForce(m_timeStep);
+  m_sgrid.solvePressure(m_timeStep);
+  m_sgrid.correctVelocity(m_timeStep);
+  m_sgrid.updateDensityAndSpeed(m_timeStep);
 }
 
 void FluidEngine::pcisphNextStep()
@@ -128,7 +130,7 @@ void FluidEngine::draw(const Program & prog, const glm::mat4 & view)
 		part->instance.draw(prog, view);
 	}
 
-  std::vector<glm::vec4> smoke = m_grid.adhereSnowSmoke(m_timeStep);
+  std::vector<glm::vec4> smoke = m_sgrid.adhereSnowSmoke(m_timeStep);
   float colorScale = 100000;
   printf("smoke size %d\n", smoke.size());
   for (glm::vec4 pos : smoke) {
@@ -193,10 +195,14 @@ void FluidEngine::buildGrid()
   minX -= EPSILON;
   minY -= EPSILON;
   minZ -= EPSILON;
-  if (m_grid.smaller(glm::vec3(minX,minY,minZ)))
-    m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+  m_grid = Grid(glm::vec3(minX, minY, minZ), m_gridResolution);
+
+  if (m_sgrid.smaller(glm::vec3(minX,minY,minZ)))
+    m_sgrid = sGrid(glm::vec3(minX, minY, minZ), m_gridResolution);
   else
-    m_grid.clear();
+    m_sgrid.clear();
+  m_sgrid.insertParticles(m_fluidParticles.begin(), m_fluidParticles.end());
+	m_sgrid.insertParticles(m_meshParticles.begin(), m_meshParticles.end());
 
 	m_grid.insertParticles(m_fluidParticles.begin(), m_fluidParticles.end());
 	m_grid.insertParticles(m_meshParticles.begin(), m_meshParticles.end());
